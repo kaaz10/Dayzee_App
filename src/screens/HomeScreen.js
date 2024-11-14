@@ -24,7 +24,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7f3eb', // Warm, light background color
+    backgroundColor: '#f7f3eb', 
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#3a3a3a', // Darker text color for contrast
+    color: '#3a3a3a', 
     marginBottom: 40,
     textAlign: 'center',
   },
@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   signInButton: {
-    backgroundColor: '#6a9fb5', // Inviting blue color
+    backgroundColor: '#6a9fb5', 
   },
   registerButton: {
-    backgroundColor: '#ffa07a', // Warm coral color for register button
+    backgroundColor: '#ffa07a', 
   },
   buttonText: {
     color: '#fff',
