@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }) {
   return (
     <ImageBackground 
-      source={require('../assets/bg_first.jpg')}
+      source={require('../../assets/images/bg_first.jpg')}
       style={[styles.background, { width, height }]}
       resizeMode="cover"
     >
