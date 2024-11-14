@@ -1,57 +1,67 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 
 export default function HomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to HabitTracker</Text>
-      <TouchableOpacity
-        style={[styles.button, styles.signInButton]}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.buttonText}>Sign In</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, styles.registerButton]}
-        onPress={() => navigation.navigate('Register')}
-      >
-        <Text style={styles.buttonText}>Register</Text>
-      </TouchableOpacity>
-    </View>
+    <ImageBackground 
+      source={require('../assets/bg_first.jpg')}
+      style={[styles.background, { width, height }]}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <TouchableOpacity
+          style={[styles.button, styles.loginButton]}
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <Text style={styles.accountText}>don’t have an account?</Text>
+        <TouchableOpacity
+          style={[styles.button, styles.registerButton]}
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={styles.buttonText}>Register</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-    backgroundColor: '#f7f3eb', 
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    width: '100%',
+    height: '100%',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#3a3a3a', 
-    marginBottom: 40,
-    textAlign: 'center',
+  overlay: {
+    backgroundColor: 'rgba(233, 240, 241, 0.9)',
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: 40,
   },
   button: {
     width: '80%',
-    padding: 15,
-    borderRadius: 10,
+    paddingVertical: 15,
+    borderRadius: 25,
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: 8,
   },
-  signInButton: {
-    backgroundColor: '#6a9fb5', 
+  loginButton: {
+    backgroundColor: '#2d2d2d',
   },
   registerButton: {
-    backgroundColor: '#ffa07a', 
+    backgroundColor: '#66cc85',
   },
   buttonText: {
-    color: '#ffa',
+    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  accountText: {
+    color: '#a6a6a6',
+    fontSize: 14,
+    marginVertical: 8,
   },
 });
