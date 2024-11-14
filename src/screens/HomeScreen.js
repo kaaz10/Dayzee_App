@@ -17,7 +17,6 @@ export default function HomeScreen({ navigation }) {
         >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <Text style={styles.accountText}>don’t have an account?</Text>
         <TouchableOpacity
           style={[styles.button, styles.registerButton]}
           onPress={() => navigation.navigate('Register')}
@@ -38,20 +37,23 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   overlay: {
-    backgroundColor: 'rgba(233, 240, 241, 0.9)',
-    width: '100%',
+    position: 'absolute',
+    bottom: 75,
     alignItems: 'center',
-    paddingVertical: 40,
+    width: '100%',
   },
   button: {
-    width: '80%',
-    paddingVertical: 15,
+    width: '50%',
+    height: '38%',
+    paddingVertical: 12,
     borderRadius: 25,
     alignItems: 'center',
-    marginVertical: 8,
+    justifyContent: 'center',
+    marginVertical: 10,
   },
   loginButton: {
     backgroundColor: '#2d2d2d',
+    marginBottom: 20
   },
   registerButton: {
     backgroundColor: '#66cc85',
@@ -60,10 +62,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
-  },
-  accountText: {
-    color: '#a6a6a6',
-    fontSize: 14,
-    marginVertical: 8,
   },
 });
