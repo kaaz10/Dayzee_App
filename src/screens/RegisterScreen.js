@@ -17,7 +17,7 @@ export default function RegisterScreen({ navigation }) {
       const user = userCredential.user;
 
       await setDoc(doc(db, "users", user.uid), { name, email, createdAt: new Date() });
-      navigation.navigate('Onboarding');
+      navigation.navigate('Main');
     } catch (error) {
       Alert.alert("Registration failed", error.message);
     }
@@ -30,6 +30,7 @@ export default function RegisterScreen({ navigation }) {
       resizeMode="cover"
     >
       <View style={styles.container}>
+        <Text style={styles.nameLabel}>name.</Text>
         <TextInput
           style={styles.inputName}
           placeholder="Name"
@@ -38,6 +39,7 @@ export default function RegisterScreen({ navigation }) {
           onChangeText={setName}
         />
         
+        <Text style={styles.emailLabel}>email.</Text>
         <TextInput
           style={styles.inputEmail}
           placeholder="Email"
@@ -46,6 +48,7 @@ export default function RegisterScreen({ navigation }) {
           onChangeText={setEmail}
         />
         
+        <Text style={styles.passwordLabel}>password.</Text>
         <TextInput
           style={styles.inputPassword}
           placeholder="Password"
@@ -73,6 +76,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
+  nameLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d2d2d',
+    position: 'absolute',
+    top: '19%', 
+    left: 35,
+  },
+  emailLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d2d2d',
+    position: 'absolute',
+    top: '32%', 
+    left: 35,
+  },
+  passwordLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d2d2d',
+    position: 'absolute',
+    top: '45%',
+    left: 35,
+  },
   inputName: {
     backgroundColor: '#fff',
     borderRadius: 20,
@@ -81,7 +108,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     position: 'absolute',
-    top: '23%', // Adjust as needed for desired positioning
+    top: '23%',
     left: 35,
     right: 35,
   },
@@ -93,7 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     position: 'absolute',
-    top: '36%', // Adjust as needed
+    top: '36%',
     left: 35,
     right: 35,
   },
@@ -105,7 +132,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     position: 'absolute',
-    top: '49%', // Adjust as needed
+    top: '49%',
     left: 35,
     right: 35,
   },
@@ -119,7 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     position: 'absolute',
-    top: '60%', // Adjust this value to control the button position
+    top: '60%',
   },
   buttonText: {
     color: '#fff',

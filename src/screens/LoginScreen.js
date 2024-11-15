@@ -11,7 +11,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => navigation.navigate('Onboarding'))
+      .then(() => navigation.navigate('Main'))
       .catch(error => Alert.alert("Login failed", error.message));
   };
 
@@ -22,14 +22,18 @@ export default function LoginScreen({ navigation }) {
       resizeMode="cover"
     >
       <View style={styles.container}>
+        <Text style={styles.inputLabel}>email.</Text>
         <TextInput
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#999"
           value={email}
           onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
         
+        <Text style={styles.inputLabel2}>password.</Text>
         <TextInput
           style={styles.input2}
           placeholder="Password"
@@ -57,6 +61,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
     position: 'relative',
+  },
+  inputLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d2d2d',
+    position: 'absolute',
+    top: '30%',
+    left: 35,
+  },
+  inputLabel2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d2d2d',
+    position: 'absolute',
+    top: '44%',
+    left: 35,
   },
   input: {
     backgroundColor: '#fff',
@@ -92,7 +112,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     position: 'absolute',
-    top: '60%', // Adjust this value to control the button position
+    top: '60%', 
   },
   buttonText: {
     color: '#fff',
