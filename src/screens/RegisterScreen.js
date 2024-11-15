@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ImageBackground, Dimensions } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet, ImageBackground, Dimensions } from 'react-native';
 import { auth, db } from '../config/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -25,13 +25,13 @@ export default function RegisterScreen({ navigation }) {
 
   return (
     <ImageBackground 
-      source={require('../../assets/images/Login.jpg')}
+      source={require('../../assets/images/Register.jpg')}
       style={[styles.background, { width, height }]}
       resizeMode="cover"
     >
       <View style={styles.container}>
         <TextInput
-          style={styles.input}
+          style={styles.inputName}
           placeholder="Name"
           placeholderTextColor="#999"
           value={name}
@@ -39,7 +39,7 @@ export default function RegisterScreen({ navigation }) {
         />
         
         <TextInput
-          style={styles.input}
+          style={styles.inputEmail}
           placeholder="Email"
           placeholderTextColor="#999"
           value={email}
@@ -47,7 +47,7 @@ export default function RegisterScreen({ navigation }) {
         />
         
         <TextInput
-          style={styles.input}
+          style={styles.inputPassword}
           placeholder="Password"
           placeholderTextColor="#999"
           secureTextEntry
@@ -71,24 +71,46 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
     position: 'relative',
   },
-  input: {
+  inputName: {
     backgroundColor: '#fff',
     borderRadius: 20,
     paddingVertical: 17,
     paddingHorizontal: 15,
     fontSize: 16,
     color: '#333',
-    marginBottom: 15,
+    position: 'absolute',
+    top: '23%', // Adjust as needed for desired positioning
     left: 35,
     right: 35,
-    width: '80%',
-    alignSelf: 'center',
+  },
+  inputEmail: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 17,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    color: '#333',
+    position: 'absolute',
+    top: '36%', // Adjust as needed
+    left: 35,
+    right: 35,
+  },
+  inputPassword: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 17,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    color: '#333',
+    position: 'absolute',
+    top: '49%', // Adjust as needed
+    left: 35,
+    right: 35,
   },
   registerButton: {
-    backgroundColor: '#66cc85',
+    backgroundColor: '#2d2d2d',
     width: '50%',
     height: '6.5%',
     paddingVertical: 12,
@@ -96,7 +118,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginTop: 20, // Controls space above the button
+    position: 'absolute',
+    top: '60%', // Adjust this value to control the button position
   },
   buttonText: {
     color: '#fff',
