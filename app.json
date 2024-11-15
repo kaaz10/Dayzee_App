@@ -15,12 +15,19 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dayzee.app",
-      "ios.config.googleMapsApiKey": "AIzaSyDLK0gkeX0UIWRF58tffKLbCpQsdlEmT3w"
+      "config": {
+        "googleMapsApiKey": "AIzaSyAcbA5FMFV9IVwHG12iwckJO3ISQ1pe21I"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAcbA5FMFV9IVwHG12iwckJO3ISQ1pe21I"
+        }
       }
     },
     "web": {
