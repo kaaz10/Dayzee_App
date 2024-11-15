@@ -13,7 +13,9 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dayzee.app",
+      "ios.config.googleMapsApiKey": "AIzaSyDLK0gkeX0UIWRF58tffKLbCpQsdlEmT3w"
     },
     "android": {
       "adaptiveIcon": {

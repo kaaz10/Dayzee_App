@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { Calendar } from 'react-native-calendars';
+import { useNavigation } from '@react-navigation/native';
 
 export default function MainScreen() {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState('');
   const [energy, setEnergy] = useState(3);
+  const navigation = useNavigation();
 
   const defaultHabits = [
     { id: 1, name: 'Study', icon: '📚' },
@@ -100,7 +102,13 @@ export default function MainScreen() {
     <TouchableOpacity
       key={habit.id}
       style={styles.habitButton}
-      onPress={() => console.log(`${habit.name} pressed`)}
+      onPress={() => {
+        if (habit.name === 'Study') {
+          navigation.navigate('StudyGoal');
+        } else {
+          console.log(`${habit.name} pressed`);
+        }
+      }}
     >
       <Text style={styles.habitIcon}>{habit.icon}</Text>
       <Text style={styles.habitName}>{habit.name}</Text>
@@ -152,6 +160,8 @@ export default function MainScreen() {
     </ScrollView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
