@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import * as Location from 'expo-location';
-import { Calendar } from 'react-native-calendars';
 import { useNavigation } from '@react-navigation/native';
+import moment from 'moment';
 
 export default function MainScreen() {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState('');
+  const [selectedDate, setSelectedDate] = useState(moment()); // Start with today's date
   const [energy, setEnergy] = useState(3);
   const navigation = useNavigation();
 
@@ -25,7 +25,7 @@ export default function MainScreen() {
     try {
       setLoading(true);
       let { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status !== 'granted') {
         Alert.alert('Permission Denied', 'Weather needs location access to work');
         setLoading(false);
@@ -33,8 +33,6 @@ export default function MainScreen() {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      console.log('Location fetched:', location);
-
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&units=metric&appid=658daa51909eb0fbb3b7a35756293a9e`
       );
@@ -44,12 +42,6 @@ export default function MainScreen() {
       }
 
       const data = await response.json();
-      console.log('Weather data:', data);
-      
-      if (!data.main || !data.weather) {
-        throw new Error('Invalid weather data format');
-      }
-
       setWeather(data);
     } catch (error) {
       console.error('Weather fetch error:', error);
@@ -66,7 +58,7 @@ export default function MainScreen() {
     if (loading) {
       return (
         <View style={styles.weatherContainer}>
-          <ActivityIndicator size="large" color="#000" />
+          <ActivityIndicator size="large" color="#2d2d2d" />
         </View>
       );
     }
@@ -80,73 +72,91 @@ export default function MainScreen() {
     }
 
     return (
-      <View style={styles.weatherContainerSingleLine}>
-        <Text style={styles.weatherSingleLine}>
-          {`${Math.round(weather.main.temp)}° C | ${weather.weather[0]?.description || 'Unknown'} | ${weather.name || 'Unknown Location'}`}
+      <View style={styles.weatherContainer}>
+        <Text style={styles.weatherTitle}>Today's Weather</Text>
+        <Text style={styles.weatherText}>
+          {`${Math.round(weather.main.temp)}° C | ${weather.weather[0]?.description || 'Unknown'} `}
         </Text>
+        <Text style={styles.weatherLocation}>{weather.name || 'Unknown Location'}</Text>
       </View>
     );
   };
 
-  const renderHabitButton = (habit) => (
-    <TouchableOpacity
-      key={habit.id}
-      style={styles.habitButton}
-      onPress={() => {
-        if (habit.name === 'Study') {
-          navigation.navigate('StudyGoal');
-        } else {
-          console.log(`${habit.name} pressed`);
-        }
-      }}
-    >
-      <Text style={styles.habitIcon}>{habit.icon}</Text>
-      <Text style={styles.habitName}>{habit.name}</Text>
-    </TouchableOpacity>
+  const startOfWeek = selectedDate.clone().startOf('week');
+  const days = Array.from({ length: 7 }, (_, i) => startOfWeek.clone().add(i, 'days'));
+
+  const renderWeeklyCalendar = () => (
+    <View style={styles.calendarContainer}>
+      <View style={styles.calendarHeader}>
+        <TouchableOpacity onPress={() => setSelectedDate(selectedDate.clone().subtract(7, 'days'))}>
+          <Text style={styles.arrow}>◀</Text>
+        </TouchableOpacity>
+        <Text style={styles.monthText}>{selectedDate.format('MMMM YYYY')}</Text>
+        <TouchableOpacity onPress={() => setSelectedDate(selectedDate.clone().add(7, 'days'))}>
+          <Text style={styles.arrow}>▶</Text>
+        </TouchableOpacity>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {days.map((day, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.dayContainer,
+              day.isSame(selectedDate, 'day') && styles.selectedDay,
+              day.isSame(moment(), 'day') && styles.currentDay,
+            ]}
+            onPress={() => setSelectedDate(day)}
+          >
+            <Text style={styles.dayText}>{day.format('ddd')}</Text>
+            <Text style={styles.dateText}>{day.format('D')}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
+  const renderHabitButtons = () => (
+    <View style={styles.habitsGrid}>
+      <View style={styles.habitRow}>
+        {defaultHabits.slice(0, 2).map(habit => (
+          <TouchableOpacity
+            key={habit.id}
+            style={styles.habitButton}
+            onPress={() => {
+              if (habit.name === 'Study') {
+                navigation.navigate('StudyGoal');
+              } else {
+                console.log(`${habit.name} pressed`);
+              }
+            }}
+          >
+            <Text style={styles.habitIcon}>{habit.icon}</Text>
+            <Text style={styles.habitName}>{habit.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={styles.habitRow}>
+        <TouchableOpacity
+          key={defaultHabits[2].id}
+          style={[styles.habitButton, styles.fullWidthHabitButton]}
+          onPress={() => console.log('Eat Food pressed')}
+        >
+          <Text style={styles.habitIcon}>{defaultHabits[2].icon}</Text>
+          <Text style={styles.habitName}>{defaultHabits[2].name}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.greeting}>make dayze count.</Text>
-      
+
       {renderWeather()}
 
-      <Calendar
-        style={styles.calendar}
-        theme={{
-          backgroundColor: '#ffffff',
-          calendarBackground: '#ffffff',
-          textSectionTitleColor: '#b6c1cd',
-          selectedDayBackgroundColor: '#2d2d2d',
-          selectedDayTextColor: '#ffffff',
-          todayTextColor: '#66cc85',
-          dayTextColor: '#2d4150',
-          textDisabledColor: '#d9e1e8'
-        }}
-        onDayPress={day => {
-          setSelected(day.dateString);
-        }}
-        markedDates={{
-          [selected]: { selected: true, selectedColor: '#2d2d2d' }
-        }}
-      />
+      {renderWeeklyCalendar()}
 
-      <View style={styles.energyContainer}>
-        <Text style={styles.energyText}>Today you felt Not great.</Text>
-        <Text style={styles.energySubtext}>Energy {energy}/5</Text>
-      </View>
-
-      <View style={styles.habitsContainer}>
-        {defaultHabits.map(habit => renderHabitButton(habit))}
-        
-        <TouchableOpacity 
-          style={styles.addButton} 
-          onPress={() => console.log('Add new habit')}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-          <Text style={styles.addButtonLabel}>Add New</Text>
-        </TouchableOpacity>
-      </View>
+      {renderHabitButtons()}
     </ScrollView>
   );
 }
@@ -154,79 +164,99 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E1EFEF',
     padding: 20,
   },
   greeting: {
-    fontSize: 32,
+    marginTop: 40,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginTop: 60,
-    marginBottom: 20,
+    marginVertical: 20,
     alignSelf: 'center',
+    color: '2d2d2d'
   },
   weatherContainer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#2d2d2d',
     padding: 20,
     borderRadius: 15,
-    marginBottom: 20,
     alignItems: 'center',
-  },
-  weatherContainerSingleLine: {
-    backgroundColor: '#f5f5f5',
-    padding: 15,
-    borderRadius: 15,
     marginBottom: 20,
+  },
+  weatherTitle: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  weatherText: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  weatherLocation: {
+    fontSize: 14,
+    color: '#ddd',
+    marginTop: 5,
+  },
+  calendarContainer: {
+    marginBottom: 20,
+  },
+  calendarHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignSelf: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
   },
-  weatherError: {
-    fontSize: 16,
-    color: '#666',
+  arrow: {
+    fontSize: 24,
+    color: '#2d2d2d',
   },
-  weatherSingleLine: {
+  monthText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  dayContainer: {
+    width: 50,
+    alignItems: 'center',
+    padding: 10,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    backgroundColor: '#f0f0f0',
+  },
+  selectedDay: {
+    backgroundColor: '#2d2d2d',
+    color: '#fff',
+  },
+  currentDay: {
+    backgroundColor: '#4caf50',
+  },
+  dayText: {
+    fontSize: 14,
+    color: '#2d2d2d',
+  },
+  dateText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2d2d2d',
-    textTransform: 'capitalize',
   },
-  refreshButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-  },
-  calendar: {
-    marginBottom: 20,
-    borderRadius: 10,
-  },
-  energyContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-    borderRadius: 15,
+  habitsGrid: {
     marginBottom: 20,
   },
-  energyText: {
-    fontSize: 18,
-    fontWeight: '500',
-  },
-  energySubtext: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 5,
-  },
-  habitsContainer: {
+  habitRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   habitButton: {
-    width: '48%',
+    flex: 1,
     backgroundColor: '#f5f5f5',
     padding: 20,
     borderRadius: 15,
+    marginHorizontal: 5,
     alignItems: 'center',
-    marginBottom: 15,
+  },
+  fullWidthHabitButton: {
+    flex: 1,
+    marginHorizontal: 0,
   },
   habitIcon: {
     fontSize: 24,
@@ -235,23 +265,6 @@ const styles = StyleSheet.create({
   habitName: {
     fontSize: 16,
     fontWeight: '500',
-  },
-  addButton: {
-    width: '48%',
-    backgroundColor: '#2d2d2d',
-    padding: 20,
-    borderRadius: 15,
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  addButtonText: {
-    fontSize: 24,
-    color: '#fff',
-    marginBottom: 8,
-  },
-  addButtonLabel: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '500',
+    color: '2d2d2d'
   },
 });
