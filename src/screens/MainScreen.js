@@ -80,20 +80,10 @@ export default function MainScreen() {
     }
 
     return (
-      <View style={styles.weatherContainer}>
-        <Text style={styles.temperature}>
-          {Math.round(weather.main.temp)}°C
+      <View style={styles.weatherContainerSingleLine}>
+        <Text style={styles.weatherSingleLine}>
+          {`${Math.round(weather.main.temp)}° C | ${weather.weather[0]?.description || 'Unknown'} | ${weather.name || 'Unknown Location'}`}
         </Text>
-        <Text style={styles.weatherDescription}>
-          {weather.weather[0]?.description || 'Unknown'}
-        </Text>
-        <Text style={styles.location}>{weather.name || 'Unknown Location'}</Text>
-        <TouchableOpacity 
-          style={styles.refreshButton}
-          onPress={fetchWeather}
-        >
-          <Text>🔄 Refresh</Text>
-        </TouchableOpacity>
       </View>
     );
   };
@@ -161,8 +151,6 @@ export default function MainScreen() {
   );
 }
 
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -174,7 +162,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 60,
     marginBottom: 20,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   weatherContainer: {
     backgroundColor: '#f5f5f5',
@@ -183,25 +171,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignItems: 'center',
   },
+  weatherContainerSingleLine: {
+    backgroundColor: '#f5f5f5',
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignSelf: 'center',
+  },
   weatherError: {
     fontSize: 16,
     color: '#666',
   },
-  temperature: {
-    fontSize: 36,
+  weatherSingleLine: {
+    fontSize: 16,
     fontWeight: 'bold',
-  },
-  weatherDescription: {
-    fontSize: 18,
-    color: '#666',
+    color: '#2d2d2d',
     textTransform: 'capitalize',
   },
-  location: {
-    fontSize: 16,
-    color: '#888',
-  },
   refreshButton: {
-    marginTop: 10,
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#fff',
