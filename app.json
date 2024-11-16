@@ -16,7 +16,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.dayzee.app",
       "config": {
-        "googleMapsApiKey": "AIzaSyAcbA5FMFV9IVwHG12iwckJO3ISQ1pe21I"
+        "googleMapsApiKey": "AIzaSyB_QruBcOWZc2KxGX3uPUfxSFvASuj4d7Q"
       }
     },
     "android": {
@@ -26,12 +26,15 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyAcbA5FMFV9IVwHG12iwckJO3ISQ1pe21I"
+          "apiKey": "AIzaSyB_QruBcOWZc2KxGX3uPUfxSFvASuj4d7Q"
         }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "googleMapsApiKey": "AIzaSyB_QruBcOWZc2KxGX3uPUfxSFvASuj4d7Q"
     }
   }
 }

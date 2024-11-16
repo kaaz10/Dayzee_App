@@ -1,15 +1,55 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 
-// daysOfWeek array to represent the days of the week
 const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+import Constants from 'expo-constants';
+
+const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
 
 const StudyGoalScreen = () => {
   const [completedToday, setCompletedToday] = useState(false);
   const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]);
+  const [location, setLocation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [places, setPlaces] = useState([]);
 
-  // Calculate the number of selected days
-  const selectedDaysCount = completedDays.filter(day => day).length;
+  useEffect(() => {
+    // Fetch user location when the component mounts
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to access location was denied.');
+        setLoading(false);
+        return;
+      }
+      let loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc.coords);
+      setLoading(false);
+      fetchNearbyPlaces(loc.coords);
+    })();
+  }, []);
+
+  // Fetch nearby places (cafes, libraries, schools) using Google Places API
+  const fetchNearbyPlaces = async (coords) => {
+    //const apiKey = 'AIzaSyB_QruBcOWZc2KxGX3uPUfxSFvASuj4d7Q'; // Replace with your Google Maps API key
+    const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
+    const { latitude, longitude } = coords;
+    const radius = 2000; // Search within 2 km
+    const types = 'cafe|library|school'; // Types of places to search
+
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${apiKey}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setPlaces(data.results);
+    } catch (error) {
+      console.error('Error fetching places:', error);
+    }
+  };
 
   const toggleDayCompletion = (index) => {
     const newCompletedDays = [...completedDays];
@@ -18,8 +58,17 @@ const StudyGoalScreen = () => {
   };
 
   const toggleCompletionStatus = () => {
-    setCompletedToday(prevState => !prevState); // Toggle completion status
+    setCompletedToday(prevState => !prevState);
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -42,9 +91,7 @@ const StudyGoalScreen = () => {
 
       {/* Goal Section */}
       <View style={styles.goalContainer}>
-        <Text style={styles.goalText}>Goal: Study {selectedDaysCount} days this week</Text>
-
-        {/* Bubble Row for Days of the Week */}
+        <Text style={styles.goalText}>Goal: Study {completedDays.filter(day => day).length} days this week</Text>
         <View style={styles.bubbleRow}>
           {daysOfWeek.map((day, index) => (
             <TouchableOpacity
@@ -58,11 +105,35 @@ const StudyGoalScreen = () => {
         </View>
       </View>
 
-      {/* Progress Section */}
-      <View style={styles.progressContainer}>
-        <Text style={styles.progressText}>Track your progress:</Text>
-        {/* Add any progress indicators or bars here if needed */}
+      {/* Google Maps Section */}
+      <View style={styles.mapContainer}>
+        <Text style={styles.mapText}>Find Study Spots Nearby:</Text>
+        <MapView
+          style={styles.map}
+          region={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02,
+          }}
+          showsUserLocation={true}
+          provider="google"
+        >
+          {places.map((place, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: place.geometry.location.lat,
+                longitude: place.geometry.location.lng,
+              }}
+              title={place.name}
+              description={place.vicinity}
+            />
+          ))}
+        </MapView>
       </View>
+
+      
     </View>
   );
 };
@@ -139,17 +210,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  progressContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-    borderRadius: 15,
+  mapContainer: {
+    flex: 1,
     marginVertical: 10,
-    alignItems: 'center',
   },
-  progressText: {
-    color: '#333',
+  map: {
+    width: '100%',
+    height: 300,
+  },
+  mapText: {
     fontSize: 18,
     fontWeight: '500',
+    marginBottom: 10,
+    color: '#333',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
