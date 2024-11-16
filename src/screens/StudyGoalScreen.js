@@ -1,55 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
-import Constants from 'expo-constants';
-
-const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
 
 const StudyGoalScreen = () => {
   const [completedToday, setCompletedToday] = useState(false);
   const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]);
-  const [location, setLocation] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [places, setPlaces] = useState([]);
+  const navigation = useNavigation();
 
-  useEffect(() => {
-    // Fetch user location when the component mounts
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission to access location was denied.');
-        setLoading(false);
-        return;
-      }
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
-      setLoading(false);
-      fetchNearbyPlaces(loc.coords);
-    })();
-  }, []);
-
-  // Fetch nearby places (cafes, libraries, schools) using Google Places API
-  const fetchNearbyPlaces = async (coords) => {
-    //const apiKey = 'AIzaSyB_QruBcOWZc2KxGX3uPUfxSFvASuj4d7Q'; // Replace with your Google Maps API key
-    const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
-    const { latitude, longitude } = coords;
-    const radius = 2000; // Search within 2 km
-    const types = 'cafe|library|school'; // Types of places to search
-
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${apiKey}`;
-
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      setPlaces(data.results);
-    } catch (error) {
-      console.error('Error fetching places:', error);
-    }
-  };
+  const selectedDaysCount = completedDays.filter(day => day).length;
 
   const toggleDayCompletion = (index) => {
     const newCompletedDays = [...completedDays];
@@ -61,20 +21,15 @@ const StudyGoalScreen = () => {
     setCompletedToday(prevState => !prevState);
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Set Your Study Goals.</Text>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backButtonText}>◀ Back</Text>
+      </TouchableOpacity>
 
-      {/* Status Section */}
+      <Text style={styles.headerText}>Set Your Study Goals</Text>
+
       <View style={styles.statusContainer}>
         <Text style={styles.statusText}>
           Status: {completedToday ? 'Studied today' : 'Not yet completed'}
@@ -89,9 +44,8 @@ const StudyGoalScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Goal Section */}
       <View style={styles.goalContainer}>
-        <Text style={styles.goalText}>Goal: Study {completedDays.filter(day => day).length} days this week</Text>
+        <Text style={styles.goalText}>Goal: Study {selectedDaysCount} days this week</Text>
         <View style={styles.bubbleRow}>
           {daysOfWeek.map((day, index) => (
             <TouchableOpacity
@@ -105,35 +59,10 @@ const StudyGoalScreen = () => {
         </View>
       </View>
 
-      {/* Google Maps Section */}
-      <View style={styles.mapContainer}>
-        <Text style={styles.mapText}>Find Study Spots Nearby:</Text>
-        <MapView
-          style={styles.map}
-          region={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-          }}
-          showsUserLocation={true}
-          provider="google"
-        >
-          {places.map((place, index) => (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: place.geometry.location.lat,
-                longitude: place.geometry.location.lng,
-              }}
-              title={place.name}
-              description={place.vicinity}
-            />
-          ))}
-        </MapView>
+      <View style={styles.progressContainer}>
+        <Text style={styles.progressText}>Track your progress:</Text>
+        {/* Add progress indicators if needed */}
       </View>
-
-      
     </View>
   );
 };
@@ -142,92 +71,99 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#E1EFEF',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+    marginTop: 60,
+    backgroundColor: '#2d2d2d',
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 15,
+    paddingBottom: 15,
+    paddingHorizontal: 20, 
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
   },
   headerText: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 10,
-    marginTop: 100,
+    color: '#2d2d2d',
+    marginVertical: 20,
   },
   statusContainer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#2d2d2d',
     padding: 20,
     borderRadius: 15,
     marginVertical: 10,
     alignItems: 'center',
   },
   statusText: {
-    color: '#333',
-    marginBottom: 10,
+    color: '#fff',
     fontSize: 18,
     fontWeight: '500',
   },
   button: {
-    backgroundColor: '#e0e0e0',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    backgroundColor: '#4caf50',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 10,
     marginTop: 10,
   },
   buttonText: {
-    fontSize: 14,
-    color: '#555',
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '500',
   },
   disabledButton: {
-    backgroundColor: '#d3d3d3',
+    backgroundColor: '#9E9E9E',
   },
   goalContainer: {
-    backgroundColor: '#f5f5f5',
     padding: 20,
     borderRadius: 15,
     marginVertical: 10,
-    alignItems: 'center',
+    backgroundColor: '#2d2d2d',
   },
   goalText: {
-    color: '#333',
     fontSize: 18,
-    fontWeight: '500',
+    color: '#fff',
+    marginBottom: 10,
+    alignSelf:'center',
   },
   bubbleRow: {
     flexDirection: 'row',
-    marginTop: 15,
+    justifyContent: 'space-between',
+    alignSelf:'center',
   },
   bubble: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 5,
+    backgroundColor: '#f0f0f0',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 5,
+    
   },
   bubbleCompleted: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4caf50',
   },
   bubbleText: {
-    fontSize: 14,
-    color: '#333',
+    color: '#2d2d2d',
+    fontSize: 16,
   },
-  mapContainer: {
-    flex: 1,
-    marginVertical: 10,
+  progressContainer: {
+    marginTop: 20,
   },
-  map: {
-    width: '100%',
-    height: 300,
-  },
-  mapText: {
-    fontSize: 18,
-    fontWeight: '500',
-    marginBottom: 10,
-    color: '#333',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  progressText: {
+    fontSize: 16,
+    color: '#2d2d2d',
   },
 });
 
