@@ -109,7 +109,9 @@ function MainScreen() {
           <Text style={styles.habitName}>{defaultHabits[2].name}</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.habitButton}>
+      <TouchableOpacity style={styles.habitButton}
+          onPress={() => navigation.navigate('Exercise')}
+        >
         <Text style={styles.habitName}>{defaultHabits[1].name}</Text>
       </TouchableOpacity>
     </View>
