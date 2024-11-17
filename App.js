@@ -42,14 +42,16 @@ function BottomTabs() {
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 0,
-          height: 70,
+          height: 80,
+          paddingTop: 5,
+          elevation: 0, 
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: 'bold',
         },
         tabBarIconStyle: {
-          paddingBottom: 2,
+          paddingBottom: 3,
         },
         headerShown: false, 
       })}
