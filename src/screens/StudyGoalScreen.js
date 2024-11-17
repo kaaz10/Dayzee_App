@@ -23,7 +23,6 @@
 
     return (
       <View style={styles.container}>
-        {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Text style={styles.backButtonText}>◀ Back</Text>
         </TouchableOpacity>
@@ -61,7 +60,6 @@
 
         <View style={styles.progressContainer}>
           <Text style={styles.progressText}>Track your progress:</Text>
-          {/* Add progress indicators if needed */}
         </View>
       </View>
     );
