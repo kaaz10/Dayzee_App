@@ -38,7 +38,7 @@ function BottomTabs() {
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#4caf50',
-        tabBarInactiveTintColor: '2d2d2d',
+        tabBarInactiveTintColor: '#a4a4a4',
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 0,
