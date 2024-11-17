@@ -221,12 +221,12 @@ const styles = StyleSheet.create({
   habitRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 8,
   },
   habitButton: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 15,
     paddingVertical: 24,
     paddingHorizontal: 8,
     alignItems: 'center',
@@ -236,18 +236,18 @@ const styles = StyleSheet.create({
   },
   habitIcon: {
     width: '100%',
-    height: 120,
-    resizeMode: 'contain',
+    height: 150,
+    resizeMode: 'cover',
     marginBottom: 8,
   },
   habitName: {
     fontSize: 18,
-    color: '#000',
+    color: '#2d2d2d',
     textAlign: 'center',
     fontWeight: 'bold',
   },
   habitDescription: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
     textAlign: 'center',
   },
