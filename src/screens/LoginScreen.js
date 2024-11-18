@@ -1,5 +1,5 @@
   import React, { useState } from 'react';
-  import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert, ImageBackground, Dimensions } from 'react-native';
+  import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert, ImageBackground, Dimensions, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
   import { auth } from '../config/firebase';
   import { signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -21,32 +21,38 @@
         style={[styles.background, { width, height }]}
         resizeMode="cover"
       >
-        <View style={styles.container}>
-          <Text style={styles.inputLabel}>email.</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          
-          <Text style={styles.inputLabel2}>password.</Text>
-          <TextInput
-            style={styles.input2}
-            placeholder="Password"
-            placeholderTextColor="#999"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-          
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Login</Text>
-          </TouchableOpacity>
-        </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} // Adjust the offset as needed
+        >
+          <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+            <Text style={styles.inputLabel}>email.</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#999"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            
+            <Text style={styles.inputLabel2}>password.</Text>
+            <TextInput
+              style={styles.input2}
+              placeholder="Password"
+              placeholderTextColor="#999"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </ImageBackground>
     );
   }
@@ -60,23 +66,19 @@
       flex: 1,
       justifyContent: 'center',
       padding: 20,
-      position: 'relative',
     },
     inputLabel: {
       fontSize: 20,
       fontWeight: 'bold',
       color: '#2d2d2d',
-      position: 'absolute',
-      top: '30%',
-      left: 35,
+      marginBottom: 10,
     },
     inputLabel2: {
       fontSize: 20,
       fontWeight: 'bold',
       color: '#2d2d2d',
-      position: 'absolute',
-      top: '44%',
-      left: 35,
+      marginTop: 20,
+      marginBottom: 10,
     },
     input: {
       backgroundColor: '#fff',
@@ -85,10 +87,7 @@
       paddingHorizontal: 15,
       fontSize: 16,
       color: '#333',
-      position: 'absolute',
-      top: '34%',
-      left: 35,
-      right: 35,
+      marginBottom: 10,
     },
     input2: {
       backgroundColor: '#fff',
@@ -97,22 +96,17 @@
       paddingHorizontal: 15,
       fontSize: 16,
       color: '#333',
-      position: 'absolute',
-      top: '48%',
-      left: 35,
-      right: 35,
+      marginBottom: 20,
     },
     loginButton: {
       backgroundColor: '#2d2d2d',
-      width: '50%',
-      height: '6.5%',
       paddingVertical: 12,
       borderRadius: 25,
       alignItems: 'center',
       justifyContent: 'center',
       alignSelf: 'center',
-      position: 'absolute',
-      top: '60%', 
+      marginTop: 20,
+      width: '50%',
     },
     buttonText: {
       color: '#fff',
