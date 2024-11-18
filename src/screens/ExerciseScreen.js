@@ -324,7 +324,7 @@
       marginTop: 10,
     },
     completedButton: {
-      backgroundColor: '#ff5722',
+      backgroundColor: '#9E9E9E',
     },
     buttonText: {
       fontSize: 16,
