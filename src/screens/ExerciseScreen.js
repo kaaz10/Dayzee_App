@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Pedometer } from 'expo-sensors';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 const ExerciseScreen = () => {
   const [completedToday, setCompletedToday] = useState(false);
   const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]);
+  const [lastCompletedDate, setLastCompletedDate] = useState(null);
+  const [weekStartDate, setWeekStartDate] = useState(null);
   const navigation = useNavigation();
   const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
   const [currentStepCount, setCurrentStepCount] = useState(0);
@@ -19,18 +22,95 @@ const ExerciseScreen = () => {
   const [loading, setLoading] = useState(true);
   const [places, setPlaces] = useState([]);
 
-  const selectedDaysCount = completedDays.filter(day => day).length;
-
-  const toggleDayCompletion = (index) => {
-    const newCompletedDays = [...completedDays];
-    newCompletedDays[index] = !newCompletedDays[index];
-    setCompletedDays(newCompletedDays);
+  // Get the current week's start date (Sunday)
+  const getWeekStartDate = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - dayOfWeek);
+    startDate.setHours(0, 0, 0, 0);
+    return startDate;
   };
 
-  const toggleCompletionStatus = () => {
-    setCompletedToday(prevState => !prevState);
+  // Load saved data
+  const loadSavedData = async () => {
+    try {
+      const savedData = await AsyncStorage.getItem('exerciseData');
+      if (savedData) {
+        const { 
+          completedDays: savedCompletedDays, 
+          lastCompletedDate: savedLastCompletedDate,
+          weekStartDate: savedWeekStartDate
+        } = JSON.parse(savedData);
+
+        // Check if we're in a new week
+        const currentWeekStart = getWeekStartDate();
+        if (!savedWeekStartDate || new Date(savedWeekStartDate) < currentWeekStart) {
+          // Reset for new week
+          setCompletedDays([false, false, false, false, false, false, false]);
+          setWeekStartDate(currentWeekStart.toISOString());
+          setCompletedToday(false);
+        } else {
+          setCompletedDays(savedCompletedDays);
+          setLastCompletedDate(savedLastCompletedDate);
+          setWeekStartDate(savedWeekStartDate);
+          
+          // Check if already completed today
+          const today = new Date().toDateString();
+          setCompletedToday(savedLastCompletedDate === today);
+        }
+      } else {
+        // Initialize with current week start
+        setWeekStartDate(getWeekStartDate().toISOString());
+      }
+    } catch (error) {
+      console.error('Error loading saved data:', error);
+    }
   };
 
+  // Save data
+  const saveData = async (newCompletedDays, newLastCompletedDate) => {
+    try {
+      const dataToSave = {
+        completedDays: newCompletedDays,
+        lastCompletedDate: newLastCompletedDate,
+        weekStartDate: weekStartDate
+      };
+      await AsyncStorage.setItem('exerciseData', JSON.stringify(dataToSave));
+    } catch (error) {
+      console.error('Error saving data:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadSavedData();
+  }, []);
+
+  const toggleCompletionStatus = async () => {
+    const today = new Date();
+    const dayIndex = today.getDay();
+    const todayString = today.toDateString();
+
+    if (!completedToday) {
+      // Mark today as completed
+      const newCompletedDays = [...completedDays];
+      newCompletedDays[dayIndex] = true;
+      setCompletedDays(newCompletedDays);
+      setCompletedToday(true);
+      setLastCompletedDate(todayString);
+      await saveData(newCompletedDays, todayString);
+    } else {
+      // Unmark today
+      const newCompletedDays = [...completedDays];
+      newCompletedDays[dayIndex] = false;
+      setCompletedDays(newCompletedDays);
+      setCompletedToday(false);
+      setLastCompletedDate(null);
+      await saveData(newCompletedDays, null);
+    }
+  };
+
+  // Pedometer setup
   useEffect(() => {
     let subscription;
 
@@ -39,12 +119,10 @@ const ExerciseScreen = () => {
       setIsPedometerAvailable(String(isAvailable));
 
       if (isAvailable) {
-        // Subscribe to current step count updates
         subscription = Pedometer.watchStepCount(result => {
           setCurrentStepCount(result.steps);
         });
 
-        // Fetch last 7 days of step count
         const end = new Date();
         const start = new Date();
         start.setDate(end.getDate() - 7);
@@ -59,15 +137,14 @@ const ExerciseScreen = () => {
     subscribe();
 
     return () => {
-      // Cleanup the subscription if it exists
       if (subscription && typeof subscription.remove === 'function') {
         subscription.remove();
       }
     };
   }, []);
 
+  // Location and places setup
   useEffect(() => {
-    // Fetch user location when the component mounts
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -82,12 +159,11 @@ const ExerciseScreen = () => {
     })();
   }, []);
 
-  // Fetch nearby parks, gyms, and recreation centers using Google Places API
   const fetchNearbyPlaces = async (coords) => {
     const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
     const { latitude, longitude } = coords;
-    const radius = 2000; // Search within 2 km
-    const types = 'park|gym|recreation_center'; // Types of places to search
+    const radius = 3000;
+    const types = 'gym|parks|recreation_centre';
 
     const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${apiKey}`;
 
@@ -109,21 +185,27 @@ const ExerciseScreen = () => {
     );
   }
 
-  return (
-    <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backButtonText}>◀ Back</Text>
-      </TouchableOpacity>
+  const selectedDaysCount = completedDays.filter(day => day).length;
 
-      <Text style={styles.headerText}>Set Your Exercise Goals</Text>
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>◀ Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerText}>exercise goals.</Text>
+        <View style={styles.placeholder} />
+      </View>
 
       <View style={styles.statusContainer}>
         <Text style={styles.statusText}>
           Status: {completedToday ? 'Exercised today' : 'Not yet completed'}
         </Text>
         <TouchableOpacity
-          style={[styles.button, completedToday && styles.disabledButton]}
+          style={[styles.button, completedToday && styles.completedButton]}
           onPress={toggleCompletionStatus}
         >
           <Text style={styles.buttonText}>
@@ -133,16 +215,15 @@ const ExerciseScreen = () => {
       </View>
 
       <View style={styles.goalContainer}>
-        <Text style={styles.goalText}>Goal: Exercise {selectedDaysCount} days this week</Text>
+        <Text style={styles.goalText}>Exercise goals {selectedDaysCount} days this week</Text>
         <View style={styles.bubbleRow}>
           {daysOfWeek.map((day, index) => (
-            <TouchableOpacity
+            <View
               key={index}
               style={[styles.bubble, completedDays[index] && styles.bubbleCompleted]}
-              onPress={() => toggleDayCompletion(index)}
             >
               <Text style={styles.bubbleText}>{day}</Text>
-            </TouchableOpacity>
+            </View>
           ))}
         </View>
       </View>
@@ -155,72 +236,79 @@ const ExerciseScreen = () => {
         <Text style={styles.weeklyStepsText}>{lastWeekSteps} steps</Text>
       </View>
 
-      {/* Google Maps Section */}
       <View style={styles.mapContainer}>
         <Text style={styles.mapText}>Find Exercise Spots Nearby:</Text>
-        <MapView
-          style={styles.map}
-          region={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-          }}
-          showsUserLocation={true}
-          provider={PROVIDER_GOOGLE}
-        >
-          {places.map((place, index) => (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: place.geometry.location.lat,
-                longitude: place.geometry.location.lng,
-              }}
-              title={place.name}
-              description={place.vicinity}
-            />
-          ))}
-        </MapView>
+        {location && (
+          <MapView
+            style={styles.map}
+            region={{
+              latitude: location.latitude,
+              longitude: location.longitude,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
+            }}
+            showsUserLocation={true}
+            provider={PROVIDER_GOOGLE}
+          >
+            {places.map((place, index) => (
+              <Marker
+                key={index}
+                coordinate={{
+                  latitude: place.geometry.location.lat,
+                  longitude: place.geometry.location.lng,
+                }}
+                title={place.name}
+                description={place.vicinity}
+              />
+            ))}
+          </MapView>
+        )}
       </View>
-    </View>
+      
+      <View style={styles.bottomPadding} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#E1EFEF',
   },
-  backButton: {
-    alignSelf: 'flex-start',
-    marginBottom: 20,
-    marginTop: 60,
-    backgroundColor: '#2d2d2d',
-    borderRadius: 30,
-    justifyContent: 'center',
+  headerContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 15,
-    paddingBottom: 15,
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
+    marginTop: 60,
+    marginBottom: 20,
+  },
+  backButton: {
+    backgroundColor: '#2d2d2d',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   backButtonText: {
     color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
+    fontSize: 14,
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center',
     color: '#2d2d2d',
-    marginVertical: 20,
+    flex: 1,
+    textAlign: 'center',
+  },
+  placeholder: {
+    width: 50,
   },
   statusContainer: {
     backgroundColor: '#2d2d2d',
     padding: 20,
     borderRadius: 15,
     marginVertical: 10,
+    marginHorizontal: 20,
     alignItems: 'center',
   },
   statusText: {
@@ -235,18 +323,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 10,
   },
+  completedButton: {
+    backgroundColor: '#ff5722',
+  },
   buttonText: {
     fontSize: 16,
     color: '#fff',
     fontWeight: '500',
   },
-  disabledButton: {
-    backgroundColor: '#9E9E9E',
-  },
   goalContainer: {
     padding: 20,
     borderRadius: 15,
     marginVertical: 10,
+    marginHorizontal: 20,
     backgroundColor: '#2d2d2d',
   },
   goalText: {
@@ -280,7 +369,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
     borderRadius: 15,
-    marginVertical: 10,
+    marginHorizontal: 20,
     backgroundColor: '#2d2d2d',
   },
   progressText: {
@@ -305,10 +394,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },
-  // Add styles for the map container
   mapContainer: {
     flex: 1,
     marginVertical: 10,
+    marginHorizontal: 20,
   },
   map: {
     width: '100%',
@@ -324,6 +413,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  bottomPadding: {
+    height: 20,
   },
 });
 

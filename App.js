@@ -14,6 +14,7 @@
   import ChartsScreen from './src/screens/ChartsScreen';
   import StudyGoalScreen from './src/screens/StudyGoalScreen';
   import ExerciseScreen from './src/screens/ExerciseScreen';
+  import DietGoalScreen from './src/screens/DietGoalScreen';
 
   const Stack = createStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -75,6 +76,7 @@
           <Stack.Screen name="Main" component={BottomTabs} />
           <Stack.Screen name="StudyGoal" component={StudyGoalScreen} />
           <Stack.Screen name="Exercise" component={ExerciseScreen} />
+          <Stack.Screen name="Diet" component={DietGoalScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     );

@@ -7,7 +7,7 @@ import Constants from 'expo-constants';
 
 const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-const StudyGoalScreen = () => {
+const DietGoalScreen = () => {
   const [completedToday, setCompletedToday] = useState(false);
   const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]);
   const [location, setLocation] = useState(null);
@@ -36,9 +36,11 @@ const StudyGoalScreen = () => {
     const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
     const { latitude, longitude } = coords;
     const radius = 2000;
-    const types = 'cafe|library|school';
+    // Search for healthy food places, nutritionists, and dietitians
+    const types = 'restaurant|health|doctor';
+    const keywords = 'healthy|nutrition|dietitian|organic';
 
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&keyword=${keywords}&key=${apiKey}`;
 
     try {
       const response = await fetch(url);
@@ -77,13 +79,13 @@ const StudyGoalScreen = () => {
         >
           <Text style={styles.backButtonText}>◀ Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerText}>study goals.</Text>
+        <Text style={styles.headerText}>diet goals.</Text>
         <View style={styles.placeholder} />
       </View>
 
       <View style={styles.statusContainer}>
         <Text style={styles.statusText}>
-          Status: {completedToday ? 'Studied today' : 'Not yet completed'}
+          Status: {completedToday ? 'Met diet goals today' : 'Not yet completed'}
         </Text>
         <TouchableOpacity
           style={[styles.button, completedToday && styles.disabledButton]}
@@ -96,7 +98,7 @@ const StudyGoalScreen = () => {
       </View>
 
       <View style={styles.goalContainer}>
-        <Text style={styles.goalText}>Study goals {selectedDaysCount} days this week</Text>
+        <Text style={styles.goalText}>Diet goals {selectedDaysCount} days this week</Text>
         <View style={styles.bubbleRow}>
           {daysOfWeek.map((day, index) => (
             <TouchableOpacity
@@ -111,7 +113,7 @@ const StudyGoalScreen = () => {
       </View>
 
       <View style={styles.mapContainer}>
-        <Text style={styles.mapText}>Find Study Spots Nearby:</Text>
+        <Text style={styles.mapText}>Find Healthy Food  Nearby:</Text>
         {location && (
           <MapView
             style={styles.map}
@@ -264,4 +266,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StudyGoalScreen;
+export default DietGoalScreen;
