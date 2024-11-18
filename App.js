@@ -11,7 +11,7 @@
   import HomeScreen from './src/screens/HomeScreen';
   import FocusScreen from './src/screens/FocusScreen';
   import JournalScreen from './src/screens/JournalScreen';
-  import ChartsScreen from './src/screens/ChartsScreen';
+  import ProfileScreen from './src/screens/ProfileScreen';
   import StudyGoalScreen from './src/screens/StudyGoalScreen';
   import ExerciseScreen from './src/screens/ExerciseScreen';
   import DietGoalScreen from './src/screens/DietGoalScreen';
@@ -32,8 +32,8 @@
               iconName = 'timer-outline';
             } else if (route.name === 'Journal') {
               iconName = 'book-outline';
-            } else if (route.name === 'Charts') {
-              iconName = 'bar-chart-outline';
+            } else if (route.name === 'Profile') {
+              iconName = 'person-outline';
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -45,7 +45,7 @@
             borderTopWidth: 0,
             height: 80,
             paddingTop: 5,
-            elevation: 0, 
+            elevation: 0,
           },
           tabBarLabelStyle: {
             fontSize: 12,
@@ -54,13 +54,13 @@
           tabBarIconStyle: {
             paddingBottom: 3,
           },
-          headerShown: false, 
+          headerShown: false,
         })}
       >
         <Tab.Screen name="Home" component={MainScreen} />
         <Tab.Screen name="Focus" component={FocusScreen} />
         <Tab.Screen name="Journal" component={JournalScreen} />
-        <Tab.Screen name="Charts" component={ChartsScreen} />
+        <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
     );
   }

@@ -21,7 +21,6 @@
       { label: 'Others', value: 'Others' },
     ];
 
-    // Fetch logged-in user ID
     useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -32,7 +31,6 @@
       return unsubscribe;
     }, []);
 
-    // Fetch notes from Firestore
     const fetchNotes = (userId) => {
       const notesQuery = query(collection(db, 'notes'), where('userId', '==', userId));
       onSnapshot(notesQuery, (snapshot) => {
@@ -41,7 +39,6 @@
       });
     };
 
-    // Add note to Firestore
     const handleAddNote = async () => {
       if (title && category) {
         await addDoc(collection(db, 'notes'), {
@@ -57,7 +54,6 @@
       }
     };
 
-    // Delete note
     const handleDeleteNote = async (id) => {
       await deleteDoc(doc(db, 'notes', id));
     };
@@ -69,7 +65,7 @@
         <FlatList
           data={notes}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ alignItems: 'center' }} // Center items
+          contentContainerStyle={{ alignItems: 'center' }} 
           renderItem={({ item }) => (
             <View style={styles.note}>
               <View style={styles.noteTextContainer}>
@@ -91,7 +87,6 @@
           <Text style={styles.addButtonText}>Add Notes</Text>
         </TouchableOpacity>
 
-        {/* Modal for Adding Notes */}
         <Modal visible={modalVisible} transparent animationType="slide">
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
@@ -157,7 +152,7 @@
       padding: 15,
       marginVertical: 8,
       borderRadius: 20,
-      width: '95%', // Adjusted width for centering
+      width: '95%',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',

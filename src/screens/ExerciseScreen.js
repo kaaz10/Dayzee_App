@@ -22,7 +22,6 @@
     const [loading, setLoading] = useState(true);
     const [places, setPlaces] = useState([]);
 
-    // Get the current week's start date (Sunday)
     const getWeekStartDate = () => {
       const now = new Date();
       const dayOfWeek = now.getDay();
@@ -32,7 +31,6 @@
       return startDate;
     };
 
-    // Load saved data
     const loadSavedData = async () => {
       try {
         const savedData = await AsyncStorage.getItem('exerciseData');
@@ -43,10 +41,8 @@
             weekStartDate: savedWeekStartDate
           } = JSON.parse(savedData);
 
-          // Check if we're in a new week
           const currentWeekStart = getWeekStartDate();
           if (!savedWeekStartDate || new Date(savedWeekStartDate) < currentWeekStart) {
-            // Reset for new week
             setCompletedDays([false, false, false, false, false, false, false]);
             setWeekStartDate(currentWeekStart.toISOString());
             setCompletedToday(false);
@@ -55,12 +51,10 @@
             setLastCompletedDate(savedLastCompletedDate);
             setWeekStartDate(savedWeekStartDate);
             
-            // Check if already completed today
             const today = new Date().toDateString();
             setCompletedToday(savedLastCompletedDate === today);
           }
         } else {
-          // Initialize with current week start
           setWeekStartDate(getWeekStartDate().toISOString());
         }
       } catch (error) {
@@ -68,7 +62,6 @@
       }
     };
 
-    // Save data
     const saveData = async (newCompletedDays, newLastCompletedDate) => {
       try {
         const dataToSave = {
@@ -92,7 +85,6 @@
       const todayString = today.toDateString();
 
       if (!completedToday) {
-        // Mark today as completed
         const newCompletedDays = [...completedDays];
         newCompletedDays[dayIndex] = true;
         setCompletedDays(newCompletedDays);
@@ -100,7 +92,6 @@
         setLastCompletedDate(todayString);
         await saveData(newCompletedDays, todayString);
       } else {
-        // Unmark today
         const newCompletedDays = [...completedDays];
         newCompletedDays[dayIndex] = false;
         setCompletedDays(newCompletedDays);
@@ -110,7 +101,6 @@
       }
     };
 
-    // Pedometer setup
     useEffect(() => {
       let subscription;
 
@@ -143,7 +133,6 @@
       };
     }, []);
 
-    // Location and places setup
     useEffect(() => {
       (async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();

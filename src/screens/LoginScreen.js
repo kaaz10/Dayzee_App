@@ -24,7 +24,7 @@
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} // Adjust the offset as needed
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} 
         >
           <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
             <Text style={styles.inputLabel}>email.</Text>

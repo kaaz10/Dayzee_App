@@ -1,40 +1,58 @@
-{
-  "expo": {
-    "name": "Dayzee",
-    "slug": "Dayzee",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.dayzee.app",
-      "config": {
-        "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+  {
+    "expo": {
+      "name": "Dayzee",
+      "slug": "Dayzee",
+      "version": "1.0.0",
+      "orientation": "portrait",
+      "icon": "./assets/icon.png",
+      "userInterfaceStyle": "light",
+      "newArchEnabled": true,
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "contain",
         "backgroundColor": "#ffffff"
       },
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
+      "plugins": [
+        [
+          "expo-image-picker",
+          {
+            "photosPermission": "The app needs access to your photos to set your profile picture.",
+            "cameraPermission": "The app needs access to your camera to take profile pictures."
+          }
+        ]
+      ],
+      "ios": {
+        "supportsTablet": true,
+        "bundleIdentifier": "com.dayzee.app",
+        "config": {
+          "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
+        },
+        "infoPlist": {
+          "NSCameraUsageDescription": "This app uses the camera to take profile pictures.",
+          "NSPhotoLibraryUsageDescription": "This app uses the photo library to select profile pictures."
         }
+      },
+      "android": {
+        "adaptiveIcon": {
+          "foregroundImage": "./assets/adaptive-icon.png",
+          "backgroundColor": "#ffffff"
+        },
+        "permissions": [
+          "CAMERA",
+          "READ_EXTERNAL_STORAGE",
+          "WRITE_EXTERNAL_STORAGE"
+        ],
+        "config": {
+          "googleMaps": {
+            "apiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
+          }
+        }
+      },
+      "web": {
+        "favicon": "./assets/favicon.png"
+      },
+      "extra": {
+        "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
       }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
     }
   }
-}
