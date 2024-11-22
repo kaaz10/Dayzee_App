@@ -1,26 +1,32 @@
   import React, { useState, useEffect } from 'react';
-  import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+  import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Platform, Dimensions } from 'react-native';
   import { useNavigation } from '@react-navigation/native';
   import { Pedometer } from 'expo-sensors';
-  import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+  import MapView, { Marker } from 'react-native-maps';
   import * as Location from 'expo-location';
   import Constants from 'expo-constants';
   import AsyncStorage from '@react-native-async-storage/async-storage';
 
+  const { width, height } = Dimensions.get('window');
+  const ASPECT_RATIO = width / height;
+  const LATITUDE_DELTA = 0.02;
+  const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+
   const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const ExerciseScreen = () => {
+    const navigation = useNavigation();
     const [completedToday, setCompletedToday] = useState(false);
     const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]);
     const [lastCompletedDate, setLastCompletedDate] = useState(null);
     const [weekStartDate, setWeekStartDate] = useState(null);
-    const navigation = useNavigation();
     const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
     const [currentStepCount, setCurrentStepCount] = useState(0);
     const [lastWeekSteps, setLastWeekSteps] = useState(0);
     const [location, setLocation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [places, setPlaces] = useState([]);
+    const [errorMsg, setErrorMsg] = useState(null);
 
     const getWeekStartDate = () => {
       const now = new Date();
@@ -75,10 +81,6 @@
       }
     };
 
-    useEffect(() => {
-      loadSavedData();
-    }, []);
-
     const toggleCompletionStatus = async () => {
       const today = new Date();
       const dayIndex = today.getDay();
@@ -102,25 +104,33 @@
     };
 
     useEffect(() => {
+      loadSavedData();
+    }, []);
+
+    useEffect(() => {
       let subscription;
 
       const subscribe = async () => {
-        const isAvailable = await Pedometer.isAvailableAsync();
-        setIsPedometerAvailable(String(isAvailable));
+        try {
+          const isAvailable = await Pedometer.isAvailableAsync();
+          setIsPedometerAvailable(String(isAvailable));
 
-        if (isAvailable) {
-          subscription = Pedometer.watchStepCount(result => {
-            setCurrentStepCount(result.steps);
-          });
+          if (isAvailable) {
+            subscription = Pedometer.watchStepCount(result => {
+              setCurrentStepCount(result.steps);
+            });
 
-          const end = new Date();
-          const start = new Date();
-          start.setDate(end.getDate() - 7);
+            const end = new Date();
+            const start = new Date();
+            start.setDate(end.getDate() - 7);
 
-          const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
-          if (pastStepCountResult) {
-            setLastWeekSteps(pastStepCountResult.steps);
+            const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
+            if (pastStepCountResult) {
+              setLastWeekSteps(pastStepCountResult.steps);
+            }
           }
+        } catch (error) {
+          console.error('Pedometer error:', error);
         }
       };
 
@@ -135,31 +145,45 @@
 
     useEffect(() => {
       (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          alert('Permission to access location was denied.');
+        try {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') {
+            setErrorMsg('Location permission denied');
+            setLoading(false);
+            return;
+          }
+
+          let locationResult = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          setLocation(locationResult.coords);
+          fetchNearbyPlaces(locationResult.coords);
           setLoading(false);
-          return;
+        } catch (error) {
+          console.error('Location error:', error);
+          setErrorMsg('Error getting location');
+          setLoading(false);
         }
-        let loc = await Location.getCurrentPositionAsync({});
-        setLocation(loc.coords);
-        setLoading(false);
-        fetchNearbyPlaces(loc.coords);
       })();
     }, []);
 
     const fetchNearbyPlaces = async (coords) => {
-      const apiKey = Constants.expoConfig.extra.googleMapsApiKey;
+      if (!Constants.expoConfig?.extra?.googleMapsApiKey) {
+        console.error('Google Maps API key not configured');
+        return;
+      }
+
       const { latitude, longitude } = coords;
       const radius = 3000;
-      const types = 'gym|parks|recreation_centre';
-
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${apiKey}`;
+      const types = 'gym|park|stadium';
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${Constants.expoConfig.extra.googleMapsApiKey}`;
 
       try {
         const response = await fetch(url);
         const data = await response.json();
-        setPlaces(data.results);
+        if (data.results) {
+          setPlaces(data.results);
+        }
       } catch (error) {
         console.error('Error fetching places:', error);
       }
@@ -170,6 +194,14 @@
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0000ff" />
           <Text>Loading...</Text>
+        </View>
+      );
+    }
+
+    if (errorMsg) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{errorMsg}</Text>
         </View>
       );
     }
@@ -225,34 +257,37 @@
           <Text style={styles.weeklyStepsText}>{lastWeekSteps} steps</Text>
         </View>
 
-        <View style={styles.mapContainer}>
-          <Text style={styles.mapText}>Find Exercise Spots Nearby:</Text>
-          {location && (
-            <MapView
-              style={styles.map}
-              region={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-                latitudeDelta: 0.02,
-                longitudeDelta: 0.02,
-              }}
-              showsUserLocation={true}
-              provider={PROVIDER_GOOGLE}
-            >
-              {places.map((place, index) => (
-                <Marker
-                  key={index}
-                  coordinate={{
-                    latitude: place.geometry.location.lat,
-                    longitude: place.geometry.location.lng,
-                  }}
-                  title={place.name}
-                  description={place.vicinity}
-                />
-              ))}
-            </MapView>
-          )}
-        </View>
+        {location && (
+          <View style={styles.mapContainer}>
+            <Text style={styles.mapText}>Find Exercise Spots Nearby:</Text>
+            <View style={styles.mapWrapper}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                  latitudeDelta: LATITUDE_DELTA,
+                  longitudeDelta: LONGITUDE_DELTA,
+                }}
+                showsUserLocation={true}
+                showsMyLocationButton={true}
+                showsCompass={true}
+              >
+                {places.map((place, index) => (
+                  <Marker
+                    key={index}
+                    coordinate={{
+                      latitude: place.geometry.location.lat,
+                      longitude: place.geometry.location.lng,
+                    }}
+                    title={place.name}
+                    description={place.vicinity}
+                  />
+                ))}
+              </MapView>
+            </View>
+          </View>
+        )}
         
         <View style={styles.bottomPadding} />
       </ScrollView>
@@ -264,12 +299,28 @@
       flex: 1,
       backgroundColor: '#E1EFEF',
     },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    errorText: {
+      color: 'red',
+      textAlign: 'center',
+      fontSize: 16,
+    },
     headerContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 20,
-      marginTop: 60,
+      marginTop: Platform.OS === 'ios' ? 60 : 40,
       marginBottom: 20,
     },
     backButton: {
@@ -387,16 +438,25 @@
       flex: 1,
       marginVertical: 10,
       marginHorizontal: 20,
+      backgroundColor: '#2d2d2d',
+      borderRadius: 15,
+      padding: 15,
+      height: 500,
+    },
+    mapWrapper: {
+      flex: 1,
+      borderRadius: 15,
+      overflow: 'hidden',
     },
     map: {
       width: '100%',
-      height: 300,
+      height: '100%',
     },
     mapText: {
       fontSize: 18,
       fontWeight: '500',
       marginBottom: 10,
-      color: '#333',
+      color: '#fff',
     },
     loadingContainer: {
       flex: 1,

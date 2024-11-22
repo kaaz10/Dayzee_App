@@ -1,58 +1,75 @@
-  {
-    "expo": {
-      "name": "Dayzee",
-      "slug": "Dayzee",
-      "version": "1.0.0",
-      "orientation": "portrait",
-      "icon": "./assets/icon.png",
-      "userInterfaceStyle": "light",
-      "newArchEnabled": true,
-      "splash": {
-        "image": "./assets/splash-icon.png",
-        "resizeMode": "contain",
+{
+  "expo": {
+    "name": "Dayzee",
+    "slug": "Dayzee",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to set your profile picture.",
+          "cameraPermission": "The app needs access to your camera to take profile pictures."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Dayzee to use your location.",
+          "locationAlwaysPermission": "Allow Dayzee to use your location.",
+          "locationWhenInUsePermission": "Allow Dayzee to use your location.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dayzee.app",
+      "config": {
+        "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to take profile pictures.",
+        "NSPhotoLibraryUsageDescription": "This app uses the photo library to select profile pictures.",
+        "NSLocationWhenInUseUsageDescription": "This app needs access to location to show nearby exercise spots.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to location to show nearby exercise spots.",
+        "UIBackgroundModes": ["location"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "plugins": [
-        [
-          "expo-image-picker",
-          {
-            "photosPermission": "The app needs access to your photos to set your profile picture.",
-            "cameraPermission": "The app needs access to your camera to take profile pictures."
-          }
-        ]
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
       ],
-      "ios": {
-        "supportsTablet": true,
-        "bundleIdentifier": "com.dayzee.app",
-        "config": {
-          "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
-        },
-        "infoPlist": {
-          "NSCameraUsageDescription": "This app uses the camera to take profile pictures.",
-          "NSPhotoLibraryUsageDescription": "This app uses the photo library to select profile pictures."
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
         }
       },
-      "android": {
-        "adaptiveIcon": {
-          "foregroundImage": "./assets/adaptive-icon.png",
-          "backgroundColor": "#ffffff"
-        },
-        "permissions": [
-          "CAMERA",
-          "READ_EXTERNAL_STORAGE",
-          "WRITE_EXTERNAL_STORAGE"
-        ],
-        "config": {
-          "googleMaps": {
-            "apiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
-          }
-        }
-      },
-      "web": {
-        "favicon": "./assets/favicon.png"
-      },
-      "extra": {
-        "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
-      }
+      "package": "com.dayzee.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "googleMapsApiKey": "AIzaSyAREwsWJYWqE9C9wUar-nr9hRtHGVGasc4"
     }
   }
+}
