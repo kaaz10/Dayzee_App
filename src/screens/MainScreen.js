@@ -11,9 +11,9 @@
     const [weather, setWeather] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigation = useNavigation();
-    const [completedStudyDays, setCompletedStudyDays] = useState(0); // State to track completed study days
-    const [completedExerciseDays, setCompletedExerciseDays] = useState(0); // State to track completed study days
-    const [completedDietDays, setCompletedDietDays] = useState(0); // State to track completed study days
+    const [completedStudyDays, setCompletedStudyDays] = useState(0); 
+    const [completedExerciseDays, setCompletedExerciseDays] = useState(0); 
+    const [completedDietDays, setCompletedDietDays] = useState(0); 
 
 
     const defaultHabits = [
@@ -33,7 +33,7 @@
           const savedData = await AsyncStorage.getItem('studyData');
           if (savedData) {
             const { completedDays } = JSON.parse(savedData);
-            const completedCount = completedDays.filter((day) => day).length; // Count true values
+            const completedCount = completedDays.filter((day) => day).length; 
             setCompletedStudyDays(completedCount);
           }
         } catch (error) {
@@ -46,7 +46,7 @@
           const savedData = await AsyncStorage.getItem('exerciseData');
           if (savedData) {
             const { completedDays } = JSON.parse(savedData);
-            const completedCount = completedDays.filter((day) => day).length; // Count true values
+            const completedCount = completedDays.filter((day) => day).length; 
             setCompletedExerciseDays(completedCount);
           }
         } catch (error) {
@@ -59,7 +59,7 @@
           const savedData = await AsyncStorage.getItem('dietData');
           if (savedData) {
             const { completedDays } = JSON.parse(savedData);
-            const completedCount = completedDays.filter((day) => day).length; // Count true values
+            const completedCount = completedDays.filter((day) => day).length; 
             setCompletedDietDays(completedCount);
           }
         } catch (error) {
@@ -71,7 +71,7 @@
       loadStudyData();
       loadExerciseData();
       loadDietData();
-    }, []) // Empty dependency array ensures this runs every time the screen is focused
+    }, [])
   );
 
     const fetchWeather = async () => {
@@ -120,10 +120,10 @@
         <View style={styles.calendarContainer}>
           <View style={styles.dayContainer}>
             <Text style={[styles.dayText, styles.currentDayText]}>
-              {today.format('dddd')} {/* Full day name */}
+              {today.format('dddd')} 
             </Text>
             <Text style={[styles.dateText, styles.currentDayText]}>
-              {today.format('MMMM D, YYYY')} {/* Full date */}
+              {today.format('MMMM D, YYYY')}
             </Text>
           </View>
         </View>
@@ -144,17 +144,17 @@
               <Text style={styles.habitName}>{habit.name}</Text>
               {habit.name === 'Study' && (
                 <Text style={styles.habitDescription}>
-                  Completed {completedStudyDays}/7 days this week
+                  Completed {completedStudyDays}/5 days this week
                 </Text>
               )}
               {habit.name === 'Exercise' && (
                 <Text style={styles.habitDescription}>
-                  Completed {completedExerciseDays}/7 days this week
+                  Completed {completedExerciseDays}/5 days this week
                 </Text>
               )}
               {habit.name === 'Diet' && (
                 <Text style={styles.habitDescription}>
-                  Completed {completedDietDays}/7 days this week
+                  Completed {completedDietDays}/5 days this week
                 </Text>
               )}
             </TouchableOpacity>
@@ -173,9 +173,7 @@
     </ScrollView>
     );
   }
-
   
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
