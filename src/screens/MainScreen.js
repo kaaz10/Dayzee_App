@@ -1,14 +1,20 @@
   import React, { useState, useEffect } from 'react';
-  import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
+  import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, Image, } from 'react-native';
   import * as Location from 'expo-location';
   import { useNavigation } from '@react-navigation/native';
   import moment from 'moment';
+  import AsyncStorage from '@react-native-async-storage/async-storage';
+  import { useFocusEffect } from '@react-navigation/native';
+
 
   function MainScreen() {
     const [weather, setWeather] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [selectedDate, setSelectedDate] = useState(moment());
     const navigation = useNavigation();
+    const [completedStudyDays, setCompletedStudyDays] = useState(0); // State to track completed study days
+    const [completedExerciseDays, setCompletedExerciseDays] = useState(0); // State to track completed study days
+    const [completedDietDays, setCompletedDietDays] = useState(0); // State to track completed study days
+
 
     const defaultHabits = [
       { id: 1, name: 'Study', icon: require('../../assets/images/Study.png'), screen: 'StudyGoal' },
@@ -19,6 +25,54 @@
     useEffect(() => {
       fetchWeather();
     }, []);
+
+    useFocusEffect(
+    React.useCallback(() => {
+      const loadStudyData = async () => {
+        try {
+          const savedData = await AsyncStorage.getItem('studyData');
+          if (savedData) {
+            const { completedDays } = JSON.parse(savedData);
+            const completedCount = completedDays.filter((day) => day).length; // Count true values
+            setCompletedStudyDays(completedCount);
+          }
+        } catch (error) {
+          console.error('Error loading study data:', error);
+        }
+      };
+
+      const loadExerciseData = async () => {
+        try {
+          const savedData = await AsyncStorage.getItem('exerciseData');
+          if (savedData) {
+            const { completedDays } = JSON.parse(savedData);
+            const completedCount = completedDays.filter((day) => day).length; // Count true values
+            setCompletedExerciseDays(completedCount);
+          }
+        } catch (error) {
+          console.error('Error loading study data:', error);
+        }
+      };
+
+      const loadDietData = async () => {
+        try {
+          const savedData = await AsyncStorage.getItem('dietData');
+          if (savedData) {
+            const { completedDays } = JSON.parse(savedData);
+            const completedCount = completedDays.filter((day) => day).length; // Count true values
+            setCompletedDietDays(completedCount);
+          }
+        } catch (error) {
+          console.error('Error loading study data:', error);
+        }
+      };
+
+
+      loadStudyData();
+      loadExerciseData();
+      loadDietData();
+    }, []) // Empty dependency array ensures this runs every time the screen is focused
+  );
 
     const fetchWeather = async () => {
       try {
@@ -42,8 +96,6 @@
       }
     };
 
-    const startOfWeek = selectedDate.clone().startOf('week');
-    const days = Array.from({ length: 7 }, (_, i) => startOfWeek.clone().add(i, 'days'));
 
     const renderWeather = () => {
       if (loading) return <ActivityIndicator size="large" />;
@@ -61,42 +113,23 @@
       );
     };
 
-    const renderWeeklyCalendar = () => (
-      <View style={styles.calendarContainer}>
-        <View style={styles.weekContainer}>
-          {days.map((day, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.dayContainer,
-                day.isSame(selectedDate, 'day') && styles.selectedDay,
-                day.isSame(moment(), 'day') && styles.currentDay,
-              ]}
-              onPress={() => setSelectedDate(day)}
-            >
-              <Text
-                style={[
-                  styles.dayText,
-                  day.isSame(selectedDate, 'day') && styles.selectedDayText,
-                  day.isSame(moment(), 'day') && styles.currentDayText,
-                ]}
-              >
-                {day.format('dd')}
-              </Text>
-              <Text
-                style={[
-                  styles.dateText,
-                  day.isSame(selectedDate, 'day') && styles.selectedDayText,
-                  day.isSame(moment(), 'day') && styles.currentDayText,
-                ]}
-              >
-                {day.format('D')}
-              </Text>
-            </TouchableOpacity>
-          ))}
+    
+    const renderWeeklyCalendar = () => {
+      const today = moment();
+      return (
+        <View style={styles.calendarContainer}>
+          <View style={styles.dayContainer}>
+            <Text style={[styles.dayText, styles.currentDayText]}>
+              {today.format('dddd')} {/* Full day name */}
+            </Text>
+            <Text style={[styles.dateText, styles.currentDayText]}>
+              {today.format('MMMM D, YYYY')} {/* Full date */}
+            </Text>
+          </View>
         </View>
-      </View>
-    );
+      );
+    };
+
 
     const renderHabitButtons = () => (
       <View style={styles.habitsContainer}>
@@ -109,7 +142,21 @@
             >
               <Image source={habit.icon} style={styles.habitIcon} />
               <Text style={styles.habitName}>{habit.name}</Text>
-              <Text style={styles.habitDescription}>Goals</Text>
+              {habit.name === 'Study' && (
+                <Text style={styles.habitDescription}>
+                  Completed {completedStudyDays}/7 days this week
+                </Text>
+              )}
+              {habit.name === 'Exercise' && (
+                <Text style={styles.habitDescription}>
+                  Completed {completedExerciseDays}/7 days this week
+                </Text>
+              )}
+              {habit.name === 'Diet' && (
+                <Text style={styles.habitDescription}>
+                  Completed {completedDietDays}/7 days this week
+                </Text>
+              )}
             </TouchableOpacity>
           ))}
         </View>
@@ -118,14 +165,16 @@
 
     return (
       <ScrollView style={styles.container}>
-        <Text style={styles.greeting}>make dayze count.</Text>
-        {renderWeather()}
-        {renderWeeklyCalendar()}
-        <Text style={styles.progressMessage}>let's start.</Text>
-        {renderHabitButtons()}
-      </ScrollView>
+      <Text style={styles.greeting}>make dayze count.</Text>
+      {renderWeather()}
+      {renderWeeklyCalendar()}
+      <Text style={styles.progressMessage}>let's start.</Text>
+      {renderHabitButtons()}
+    </ScrollView>
     );
   }
+
+  
 
   const styles = StyleSheet.create({
     container: {
@@ -177,43 +226,6 @@
       color: '#ff0000',
       marginBottom: 15,
     },
-    calendarContainer: {
-      marginBottom: 15,
-    },
-    weekContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-    dayContainer: {
-      flex: 1,
-      alignItems: 'center',
-      padding: 8,
-      borderRadius: 8,
-      marginHorizontal: 2,
-      backgroundColor: 'transparent',
-    },
-    selectedDay: {
-      backgroundColor: '#f0f0f0',
-    },
-    currentDay: {
-      backgroundColor: '#E8F5E9',
-    },
-    dayText: {
-      fontSize: 14,
-      color: '#2d2d2d',
-      marginBottom: 4,
-    },
-    dateText: {
-      fontSize: 18,
-      color: '#2d2d2d',
-      fontWeight: 'bold',
-    },
-    selectedDayText: {
-      color: '#2d2d2d',
-    },
-    currentDayText: {
-      color: '#4caf50',
-    },
     habitsContainer: {
       marginTop: 15,
     },
@@ -246,9 +258,10 @@
       fontWeight: 'bold',
     },
     habitDescription: {
-      fontSize: 12,
-      color: '#666',
+      fontSize: 14,
+      color: '#2d2d2d',
       textAlign: 'center',
+      marginTop: 5,
     },
     progressMessage: {
       fontSize: 22,
@@ -257,6 +270,27 @@
       color: '#2d2d2d',
       marginVertical: 10,
     },
+    calendarContainer: {
+      alignItems: 'center',
+      marginVertical: 15,
+    },
+    dayContainer: {
+      padding: 10,
+      borderRadius: 10,
+      backgroundColor: '#E8F5E9',
+      alignItems: 'center',
+    },
+    dayText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#4caf50',
+    },
+    dateText: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: '#2d2d2d',
+    },
+    
   });
 
   export default MainScreen;
