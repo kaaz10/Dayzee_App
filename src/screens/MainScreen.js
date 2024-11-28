@@ -286,7 +286,7 @@
       color: '#4caf50',
     },
     dateText: {
-      fontSize: 22,
+      fontSize: 20,
       fontWeight: 'bold',
       color: '#2d2d2d',
     },
