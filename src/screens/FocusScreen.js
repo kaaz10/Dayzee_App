@@ -1,9 +1,11 @@
+  //importing necessary libraries and modules
   import React, { useState, useRef, useEffect } from 'react';
   import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
   import { Audio } from 'expo-av';
   import { Pause, Play } from 'lucide-react-native';
   import DropDownPicker from 'react-native-dropdown-picker';
 
+  //music track options
   const MUSIC_TRACKS = {
     'no-music': null,
     'study': require('../../assets/music/study.mp3'),
@@ -11,19 +13,23 @@
     'diet': require('../../assets/music/diet.mp3'),
   };
 
+  //timer duration options
   const TIMER_OPTIONS = [5, 15, 30, 60];
 
   export default function FocusScreen() {
-    const [selectedMinutes, setSelectedMinutes] = useState(30);
-    const [isTimerRunning, setIsTimerRunning] = useState(false);
-    const [timeRemaining, setTimeRemaining] = useState(30 * 60); // in seconds
-    const [selectedMusic, setSelectedMusic] = useState(null);
-    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [openDropdown, setOpenDropdown] = useState(false);
+    const [selectedMinutes, setSelectedMinutes] = useState(30); //selected timer duration
+    const [isTimerRunning, setIsTimerRunning] = useState(false); //timer running status
+    const [timeRemaining, setTimeRemaining] = useState(30 * 60); //remaining time in seconds
+    const [selectedMusic, setSelectedMusic] = useState(null); //selected background music
+    const [isMusicPlaying, setIsMusicPlaying] = useState(false); //music playing status
+    const [modalVisible, setModalVisible] = useState(false); //music selection modal visibility
+    const [openDropdown, setOpenDropdown] = useState(false); //dropdown open status
+    
+    //refs for timer and music management
     const timerRef = useRef(null);
     const musicRef = useRef(null);
 
+    //music selection options
     const musicOptions = [
       { label: 'No Music', value: 'no-music' },
       { label: 'Study', value: 'study' },
@@ -31,6 +37,7 @@
       { label: 'Diet', value: 'diet' },
     ];
 
+    //setup audio configuration on component mount
     useEffect(() => {
       const setupAudio = async () => {
         await Audio.setAudioModeAsync({
@@ -42,6 +49,7 @@
       };
       setupAudio();
 
+      //cleanup music on component unmount
       return () => {
         if (musicRef.current) {
           musicRef.current.unloadAsync();
@@ -49,6 +57,7 @@
       };
     }, []);
 
+    //play selected background music
     const playMusic = async () => {
       if (selectedMusic === 'no-music') return;
 
@@ -65,6 +74,7 @@
           musicRef.current = sound;
           setIsMusicPlaying(true);
         } else {
+          //resume paused music
           await musicRef.current.playAsync();
           setIsMusicPlaying(true);
         }
@@ -73,6 +83,7 @@
       }
     };
 
+    //pause currently playing music
     const pauseMusic = async () => {
       if (musicRef.current) {
         await musicRef.current.pauseAsync();
@@ -80,6 +91,7 @@
       }
     };
 
+    //stop and unload music
     const stopMusic = async () => {
       if (musicRef.current) {
         await musicRef.current.stopAsync();
@@ -89,6 +101,7 @@
       }
     };
 
+    //start the focus timer and music
     const startTimer = () => {
       if (isTimerRunning) return;
 
@@ -99,9 +112,11 @@
         playMusic();
       }
 
+      //countdown timer logic
       timerRef.current = setInterval(() => {
         setTimeRemaining((prev) => {
           if (prev <= 1) {
+            //stop timer when reaching zero
             clearInterval(timerRef.current);
             setIsTimerRunning(false);
             stopMusic();
@@ -112,6 +127,7 @@
       }, 1000);
     };
 
+    //reset timer and stop music
     const resetTimer = () => {
       clearInterval(timerRef.current);
       setIsTimerRunning(false);
@@ -126,6 +142,7 @@
       return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
+    //select timer duration
     const selectTime = (minutes) => {
       if (!isTimerRunning) {
         setSelectedMinutes(minutes);
@@ -133,6 +150,7 @@
       }
     };
 
+    //handle music selection in modal
     const handleMusicSelection = () => {
       setModalVisible(false);
     };
@@ -238,6 +256,7 @@
     );
   }
 
+  //custom styles
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -312,7 +331,7 @@
       borderRadius: 25,
       backgroundColor: '#2d2d2d',
     },
-      startButton: {
+    startButton: {
       marginBottom: 60,
       backgroundColor: '#2d2d2d',
       borderRadius: 25,
@@ -362,4 +381,3 @@
       textAlign: 'center',
     },
   });
-
