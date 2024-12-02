@@ -1,3 +1,4 @@
+  //importing necessary libraries and modules
   import React, { useState, useEffect } from 'react';
   import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Platform, Dimensions } from 'react-native';
   import { useNavigation } from '@react-navigation/native';
@@ -6,24 +7,31 @@
   import Constants from 'expo-constants';
   import AsyncStorage from '@react-native-async-storage/async-storage';
 
+  //map rendering screen dimensions
   const { width, height } = Dimensions.get('window');
   const ASPECT_RATIO = width / height;
   const LATITUDE_DELTA = 0.02;
   const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
+  //week
   const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const DietGoalScreen = () => {
+    //navigation and state management hooks
     const navigation = useNavigation();
-    const [completedToday, setCompletedToday] = useState(false);
-    const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]);
-    const [lastCompletedDate, setLastCompletedDate] = useState(null);
-    const [weekStartDate, setWeekStartDate] = useState(null);
-    const [location, setLocation] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [places, setPlaces] = useState([]);
-    const [errorMsg, setErrorMsg] = useState(null);
+    
+    const [completedToday, setCompletedToday] = useState(false); //if diet goal is completed today
+    const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]); //completed days of the week
+    const [lastCompletedDate, setLastCompletedDate] = useState(null); //the last date diet goal was completed
+    const [weekStartDate, setWeekStartDate] = useState(null); //the start of the current week
+    
+    //location and places
+    const [location, setLocation] = useState(null); //user's current location
+    const [loading, setLoading] = useState(true); //loading state
+    const [places, setPlaces] = useState([]); //nearby healthy food places
+    const [errorMsg, setErrorMsg] = useState(null); //any error messages
 
+    //the start of the current week
     const getWeekStartDate = () => {
       const now = new Date();
       const dayOfWeek = now.getDay();
@@ -33,6 +41,7 @@
       return startDate;
     };
 
+    //load previously saved diet goal data from AsyncStorage
     const loadSavedData = async () => {
       try {
         const savedData = await AsyncStorage.getItem('dietData');
@@ -64,6 +73,7 @@
       }
     };
 
+    //saves diet goals to async storage
     const saveData = async (newCompletedDays, newLastCompletedDate) => {
       try {
         const dataToSave = {
@@ -77,6 +87,7 @@
       }
     };
 
+    //check completion status for today's diet goal
     const toggleCompletionStatus = async () => {
       const today = new Date();
       const dayIndex = today.getDay();
@@ -99,10 +110,12 @@
       }
     };
 
+    //load saved data on component mount
     useEffect(() => {
       loadSavedData();
     }, []);
 
+    //location permissions and fetch current location requests
     useEffect(() => {
       (async () => {
         try {
@@ -127,12 +140,14 @@
       })();
     }, []);
 
+    //fetches nearby healthy food places using google places API
     const fetchNearbyPlaces = async (coords) => {
       if (!Constants.expoConfig?.extra?.googleMapsApiKey) {
         console.error('Google Maps API key not configured');
         return;
       }
 
+      //prepare API parameters
       const { latitude, longitude } = coords;
       const radius = 3000;
       const types = 'restaurant|cafe|grocery_or_supermarket';
@@ -140,6 +155,7 @@
       const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&keyword=${keyword}&key=${Constants.expoConfig.extra.googleMapsApiKey}`;
 
       try {
+        //fetch and set nearby places
         const response = await fetch(url);
         const data = await response.json();
         if (data.results) {
@@ -159,6 +175,7 @@
       );
     }
 
+    //error message if location access fails
     if (errorMsg) {
       return (
         <View style={styles.errorContainer}>
@@ -247,6 +264,7 @@
     );
   };
 
+  //custom styles
   const styles = StyleSheet.create({
     container: {
       flex: 1,
