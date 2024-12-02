@@ -1,3 +1,4 @@
+  //importing necessary libraries and modules
   import React, { useState, useEffect } from 'react';
   import { View, Text, TouchableOpacity, StyleSheet, FlatList, Modal, TextInput } from 'react-native';
   import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
@@ -7,13 +8,14 @@
   import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
   export default function JournalScreen() {
-    const [modalVisible, setModalVisible] = useState(false);
-    const [notes, setNotes] = useState([]);
-    const [title, setTitle] = useState('');
-    const [category, setCategory] = useState(null);
-    const [openDropdown, setOpenDropdown] = useState(false);
-    const [userId, setUserId] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false); //handles the pop up for entry
+    const [notes, setNotes] = useState([]); // stores the notes in an array
+    const [title, setTitle] = useState(''); // holds the title of the note
+    const [category, setCategory] = useState(null); // holds the category of the entry
+    const [openDropdown, setOpenDropdown] = useState(false); // open and closes any dropdowns
+    const [userId, setUserId] = useState(null); // stores the user's ID
 
+    // tracks the selected category of the note
     const categories = [
       { label: 'Study', value: 'Study' },
       { label: 'Exercise', value: 'Exercise' },
@@ -21,6 +23,7 @@
       { label: 'Others', value: 'Others' },
     ];
 
+    // managing the notes state effect
     useEffect(() => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -31,6 +34,7 @@
       return unsubscribe;
     }, []);
 
+    // checks Firebase for notes where userId matches the logged-in user
     const fetchNotes = (userId) => {
       const notesQuery = query(collection(db, 'notes'), where('userId', '==', userId));
       onSnapshot(notesQuery, (snapshot) => {
@@ -39,6 +43,7 @@
       });
     };
 
+    // adds a new note to the notes collection in Firebase
     const handleAddNote = async () => {
       if (title && category) {
         await addDoc(collection(db, 'notes'), {
@@ -54,10 +59,12 @@
       }
     };
 
+    // deletes a specific note from Firebase 
     const handleDeleteNote = async (id) => {
       await deleteDoc(doc(db, 'notes', id));
     };
 
+    // outputs the user interface
     return (
       <View style={styles.container}>
         <Text style={styles.header}>journal.</Text>
@@ -121,6 +128,7 @@
     );
   }
 
+  // journal's styling for the containers and text
   const styles = StyleSheet.create({
     container: {
       flex: 1,
