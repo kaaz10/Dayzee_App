@@ -1,22 +1,28 @@
+  //importing necessary libraries and modules
   import React from 'react';
   import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Dimensions } from 'react-native';
 
+  //screen dimensions for responsive background
   const { width, height } = Dimensions.get('window');
 
   export default function HomeScreen({ navigation }) {
     return (
+      //full-screen background image
       <ImageBackground 
         source={require('../../assets/images/bg_first.jpg')}
         style={[styles.background, { width, height }]}
         resizeMode="cover"
       >
         <View style={styles.overlay}>
+          {/*login button*/}
           <TouchableOpacity
             style={[styles.button, styles.loginButton]}
             onPress={() => navigation.navigate('Login')}
           >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
+
+          {/*register button*/}
           <TouchableOpacity
             style={[styles.button, styles.registerButton]}
             onPress={() => navigation.navigate('Register')}
@@ -28,6 +34,7 @@
     );
   }
 
+  //custom styling
   const styles = StyleSheet.create({
     background: {
       flex: 1,

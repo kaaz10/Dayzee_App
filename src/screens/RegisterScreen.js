@@ -1,3 +1,4 @@
+  //importing necessary libraries and modules
   import React, { useState } from 'react';
   import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet, ImageBackground, Dimensions, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
   import { auth, db } from '../config/firebase';
