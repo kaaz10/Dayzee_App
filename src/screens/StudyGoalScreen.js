@@ -16,7 +16,7 @@
 
   const StudyGoalScreen = () => {
     const navigation = useNavigation();
-    const [completedToday, setCompletedToday] = useState(false); // tracks if the study goal is completed today.
+    const [completedToday, setCompletedToday] = useState(false); // tracks if the study goal is completed today
     const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]); // tracks the days of the week when the study goal was completed
     const [lastCompletedDate, setLastCompletedDate] = useState(null); // stores the last date when the study goal was marked completed
     const [weekStartDate, setWeekStartDate] = useState(null); // holds the date of the current week for resetting progress

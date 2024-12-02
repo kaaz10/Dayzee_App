@@ -1,3 +1,4 @@
+  // Importing necessary libraries and modules
   import React, { useState, useEffect } from 'react';
   import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Platform, Dimensions } from 'react-native';
   import { useNavigation } from '@react-navigation/native';
@@ -16,18 +17,19 @@
 
   const ExerciseScreen = () => {
     const navigation = useNavigation();
-    const [completedToday, setCompletedToday] = useState(false);
-    const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]);
-    const [lastCompletedDate, setLastCompletedDate] = useState(null);
-    const [weekStartDate, setWeekStartDate] = useState(null);
-    const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
-    const [currentStepCount, setCurrentStepCount] = useState(0);
-    const [lastWeekSteps, setLastWeekSteps] = useState(0);
-    const [location, setLocation] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [places, setPlaces] = useState([]);
-    const [errorMsg, setErrorMsg] = useState(null);
+    const [completedToday, setCompletedToday] = useState(false); // tracks if the study goal is completed today
+    const [completedDays, setCompletedDays] = useState([false, false, false, false, false, false, false]); // tracks the days of the week when the study goal was completed
+    const [lastCompletedDate, setLastCompletedDate] = useState(null); // stores the last date when the study goal was marked completed
+    const [weekStartDate, setWeekStartDate] = useState(null); // holds the date of the current week for resetting progress
+    const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking'); // checks whether pedometer is avaliable
+    const [currentStepCount, setCurrentStepCount] = useState(0); // stores current step count
+    const [lastWeekSteps, setLastWeekSteps] = useState(0); // stores and calculates the last week steps
+    const [location, setLocation] = useState(null); // stores the user's current location
+    const [loading, setLoading] = useState(true); // indicates whether the app is loading location or data
+    const [places, setPlaces] = useState([]); // stores nearby locations for studying
+    const [errorMsg, setErrorMsg] = useState(null); // displays any errors related to geolocation
 
+    // calculates the start of the week
     const getWeekStartDate = () => {
       const now = new Date();
       const dayOfWeek = now.getDay();
@@ -37,6 +39,7 @@
       return startDate;
     };
 
+    // retrieves saved data from AsyncStorage
     const loadSavedData = async () => {
       try {
         const savedData = await AsyncStorage.getItem('exerciseData');
@@ -68,6 +71,7 @@
       }
     };
 
+    // saves the current progress and last completed date into AsyncStorage
     const saveData = async (newCompletedDays, newLastCompletedDate) => {
       try {
         const dataToSave = {
@@ -81,6 +85,7 @@
       }
     };
 
+    // marks today as completed/not completed and updates states
     const toggleCompletionStatus = async () => {
       const today = new Date();
       const dayIndex = today.getDay();
@@ -103,10 +108,12 @@
       }
     };
 
+    // calls loadSavedData
     useEffect(() => {
       loadSavedData();
     }, []);
 
+    // checks if pedometer is avaliable, updates count, and displays last 7 days of steps
     useEffect(() => {
       let subscription;
 
@@ -143,6 +150,7 @@
       };
     }, []);
 
+    // requests location permission and stores user's location
     useEffect(() => {
       (async () => {
         try {
@@ -167,6 +175,7 @@
       })();
     }, []);
 
+    // fetches nearby places for the study goal
     const fetchNearbyPlaces = async (coords) => {
       if (!Constants.expoConfig?.extra?.googleMapsApiKey) {
         console.error('Google Maps API key not configured');
@@ -189,6 +198,7 @@
       }
     };
 
+    // loading indicator
     if (loading) {
       return (
         <View style={styles.loadingContainer}>
@@ -198,6 +208,7 @@
       );
     }
 
+    // to display error message if need be
     if (errorMsg) {
       return (
         <View style={styles.errorContainer}>
@@ -206,8 +217,10 @@
       );
     }
 
+    // calculates number of marked days completed
     const selectedDaysCount = completedDays.filter(day => day).length;
 
+    // displays all the containers with buttons, pedometer, and map with marked locations
     return (
       <ScrollView style={styles.container}>
         <View style={styles.headerContainer}>
@@ -294,6 +307,7 @@
     );
   };
 
+  // styles all the containers, the map, text, etc.
   const styles = StyleSheet.create({
     container: {
       flex: 1,
