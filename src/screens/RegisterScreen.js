@@ -4,26 +4,38 @@
   import { createUserWithEmailAndPassword } from 'firebase/auth';
   import { doc, setDoc } from 'firebase/firestore';
 
+  //screen dimensions for responsive background
   const { width, height } = Dimensions.get('window');
 
   export default function RegisterScreen({ navigation }) {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');        //user's name
+    const [email, setEmail] = useState('');      //user's email
+    const [password, setPassword] = useState(''); //user's password
 
+    //user registration process
     const handleRegister = async () => {
       try {
+        //create user with Firebase Authentication
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        await setDoc(doc(db, "users", user.uid), { name, email, createdAt: new Date() });
+        //store additional user information in Firestore
+        await setDoc(doc(db, "users", user.uid), { 
+          name, 
+          email, 
+          createdAt: new Date() 
+        });
+
+        //navigate to main screen
         navigation.navigate('Main');
       } catch (error) {
+        //error
         Alert.alert("Registration failed", error.message);
       }
     };
 
     return (
+      // Full-screen background image
       <ImageBackground 
         source={require('../../assets/images/Register.jpg')}
         style={[styles.background, { width, height }]}
@@ -58,7 +70,7 @@
               style={styles.inputPassword}
               placeholder="Password"
               placeholderTextColor="#999"
-              secureTextEntry
+              secureTextEntry     //hide password input
               value={password}
               onChangeText={setPassword}
             />
@@ -72,6 +84,7 @@
     );
   }
 
+  //cutsom styles
   const styles = StyleSheet.create({
     background: {
       flex: 1,
