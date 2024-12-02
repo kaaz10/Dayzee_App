@@ -1,3 +1,4 @@
+  //importing necessary libraries and modules
   import React, { useState, useEffect } from 'react';
   import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Modal, Image, ActivityIndicator, Platform } from 'react-native';
   import { auth, db } from '../config/firebase';
@@ -9,15 +10,16 @@
   import * as FileSystem from 'expo-file-system';
 
   export default function ProfileScreen({ navigation }) {
-    const [user, setUser] = useState(null);
-    const [userData, setUserData] = useState(null);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [imageUri, setImageUri] = useState(null);
-    const [uploadingImage, setUploadingImage] = useState(false);
+    const [user, setUser] = useState(null); // stores the current authenticated user
+    const [userData, setUserData] = useState(null); // stores user-specific data retrieved from Firestore 
+    const [modalVisible, setModalVisible] = useState(false); // controls the visibility of the pop up modal
+    const [currentPassword, setCurrentPassword] = useState(''); // store the current passwords 
+    const [newPassword, setNewPassword] = useState(''); // store the new set passwords 
+    const [loading, setLoading] = useState(false); // checks whether the password update process is in progress
+    const [imageUri, setImageUri] = useState(null); // stores the URI of the profile image
+    const [uploadingImage, setUploadingImage] = useState(false); // checks if an image is currently being uploaded
 
+    // gets the current authenticated user, loads their data, and loads the user's profile image
     useEffect(() => {
       const currentUser = auth.currentUser;
       if (currentUser) {
@@ -27,6 +29,7 @@
       }
     }, []);
 
+    // checks for camera and media library permissions
     useEffect(() => {
       (async () => {
         if (Platform.OS !== 'web') {
@@ -43,6 +46,7 @@
       })();
     }, []);
 
+    // checks if a profile image has been saved locally using AsyncStorage
     const loadProfileImage = async (userId) => {
       try {
         const savedImageUri = await AsyncStorage.getItem(`@profile_image_${userId}`);
@@ -57,6 +61,7 @@
       }
     };
 
+    // retrieves user data from Firestore
     const fetchUserData = async (uid) => {
       try {
         const userDoc = await getDoc(doc(db, 'users', uid));
@@ -69,6 +74,7 @@
       }
     };
 
+    // saves the selected profile image to the device's local storage
     const saveImageLocally = async (uri, userId) => {
       try {
         const filename = `profile_${userId}_${Date.now()}.jpg`;
@@ -96,6 +102,7 @@
       }
     };
 
+    // opens the device's image picker and lets the user select an image
     const pickImage = async () => {
       try {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -114,6 +121,7 @@
       }
     };
 
+    // opens the device's camera and allows the user to take a photo
     const takePhoto = async () => {
       try {
         const result = await ImagePicker.launchCameraAsync({
@@ -131,6 +139,7 @@
       }
     };
 
+    // handles the process of selecting or capturing an image
     const handleImageSelected = async (uri) => {
       if (!auth.currentUser) {
         Alert.alert('Error', 'User not authenticated');
@@ -156,6 +165,7 @@
       }
     };
 
+    // signs the user out using Firebase's signOut method
     const handleSignOut = async () => {
       try {
         await signOut(auth);
@@ -165,6 +175,7 @@
       }
     };
 
+    // handles the password change process
     const handleChangePassword = async () => {
       if (!currentPassword || !newPassword) {
         Alert.alert('Error', 'Please fill in all fields');
@@ -193,6 +204,7 @@
       }
     };
 
+    // shows an alert with options for the user to either take a photo or choose an image
     const showImageOptions = () => {
       Alert.alert(
         'Change Profile Picture',
@@ -215,6 +227,7 @@
       );
     };
 
+    // if there is no user data, a loading spinner is displayed
     if (!user || !userData) {
       return (
         <View style={styles.container}>
@@ -223,6 +236,7 @@
       );
     }
 
+    // creates the user interface of the profile screen
     return (
       <View style={styles.container}>
         <Text style={styles.header}>profile.</Text>
@@ -309,6 +323,7 @@
     );
   }
 
+  // styles all containers, buttons, text, etc...
   const styles = StyleSheet.create({
     container: {
       flex: 1,
