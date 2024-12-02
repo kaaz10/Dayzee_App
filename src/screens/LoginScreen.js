@@ -1,3 +1,4 @@
+  //importing necessary libraries and modules
   import React, { useState } from 'react';
   import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert, ImageBackground, Dimensions, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
   import { auth } from '../config/firebase';
@@ -6,15 +7,17 @@
   const { width, height } = Dimensions.get('window');
 
   export default function LoginScreen({ navigation }) {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState(''); // stores the email input
+    const [password, setPassword] = useState(''); // stores the password input
 
+    // handles the login logic using Firebase
     const handleLogin = () => {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => navigation.navigate('Main'))
         .catch(error => Alert.alert("Login failed", error.message));
     };
 
+    // creates a screen with an image background, a scrollable container,input fields, and button
     return (
       <ImageBackground 
         source={require('../../assets/images/Login.jpg')}
@@ -57,6 +60,7 @@
     );
   }
 
+  // styles the login page along with the container, text, etc...
   const styles = StyleSheet.create({
     background: {
       flex: 1,
