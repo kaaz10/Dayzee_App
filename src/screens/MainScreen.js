@@ -1,3 +1,4 @@
+  // Importing necessary libraries and modules
   import React, { useState, useEffect } from 'react';
   import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert, Image, } from 'react-native';
   import * as Location from 'expo-location';
@@ -8,24 +9,26 @@
 
 
   function MainScreen() {
-    const [weather, setWeather] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const navigation = useNavigation();
-    const [completedStudyDays, setCompletedStudyDays] = useState(0); 
-    const [completedExerciseDays, setCompletedExerciseDays] = useState(0); 
-    const [completedDietDays, setCompletedDietDays] = useState(0); 
+    const [weather, setWeather] = useState(null); // stores fetched weather data
+    const [loading, setLoading] = useState(true); // tracks if the app is gathering weather data
+    const navigation = useNavigation(); // navigation object to go between screens
+    const [completedStudyDays, setCompletedStudyDays] = useState(0); // tracks completed days for study
+    const [completedExerciseDays, setCompletedExerciseDays] = useState(0); // tracks completed days for exercise
+    const [completedDietDays, setCompletedDietDays] = useState(0); // tracks completed days for diet
 
-
+    // defining habits array
     const defaultHabits = [
       { id: 1, name: 'Study', icon: require('../../assets/images/Study.png'), screen: 'StudyGoal' },
       { id: 2, name: 'Exercise', icon: require('../../assets/images/Exercise.png'), screen: 'Exercise' },
       { id: 3, name: 'Diet', icon: require('../../assets/images/Food.png'), screen: 'Diet' },
     ];
 
+    // calls fetchWeather on initial render
     useEffect(() => {
       fetchWeather();
     }, []);
 
+    // reloads study, exercise, and diet data from AsyncStorage
     useFocusEffect(
     React.useCallback(() => {
       const loadStudyData = async () => {
@@ -74,6 +77,7 @@
     }, [])
   );
 
+    // fetches current weather data from an API using the device’s location
     const fetchWeather = async () => {
       try {
         setLoading(true);
@@ -96,7 +100,7 @@
       }
     };
 
-
+    // shows loading indicator and renders weather if avaliable
     const renderWeather = () => {
       if (loading) return <ActivityIndicator size="large" />;
       if (!weather || !weather.main) return <Text style={styles.weatherError}>Weather unavailable</Text>;
@@ -113,7 +117,7 @@
       );
     };
 
-    
+    // renders current day and date using moment
     const renderWeeklyCalendar = () => {
       const today = moment();
       return (
@@ -130,7 +134,8 @@
       );
     };
 
-
+    // creates habit buttons, displays the habit details like completion days and icon,
+    // and navigates when pressed
     const renderHabitButtons = () => (
       <View style={styles.habitsContainer}>
         <View style={styles.habitRow}>
@@ -163,6 +168,7 @@
       </View>
     );
 
+    // displays a scrollable screen for the main screen
     return (
       <ScrollView style={styles.container}>
       <Text style={styles.greeting}>make dayze count.</Text>
@@ -173,7 +179,8 @@
     </ScrollView>
     );
   }
-  
+
+  // defines styles for components like containers and text
   const styles = StyleSheet.create({
     container: {
       flex: 1,
